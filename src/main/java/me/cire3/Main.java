@@ -17,6 +17,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello LWJGL! - cire3");
         initGlfw();
+        App.getInstance().run();
     }
 
     public static void initGlfw() {
@@ -35,14 +36,11 @@ public class Main {
             throw new RuntimeException("Failed to create Window object!");
         }
 
-        glfwSetKeyCallback(window, (window0, key, scancode, action, mods) -> {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                glfwSetWindowShouldClose(window0, true);
-        });
+        new App(window);
 
         try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
+            IntBuffer pWidth = stack.mallocInt(1);
+            IntBuffer pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(window, pWidth, pHeight);
 
@@ -56,6 +54,8 @@ public class Main {
         }
 
         glfwMakeContextCurrent(window);
+        glfwSetFramebufferSizeCallback(window, (window0, w, h) ->
+                App.getInstance().framebufferSizeCallback(window0, w, h));
         glfwSwapInterval(1);
         glfwShowWindow(window);
     }
