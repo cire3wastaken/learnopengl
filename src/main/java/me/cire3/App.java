@@ -53,6 +53,7 @@ public class App {
         glEnableVertexAttribArray(0);
 
         glUseProgram(program);
+        glBindVertexArray(vao);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
