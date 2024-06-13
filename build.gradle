@@ -102,6 +102,14 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-zstd::$lwjglNatives"
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources"
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
 }

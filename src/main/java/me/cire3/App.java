@@ -1,12 +1,20 @@
 package me.cire3;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class App {
     private static App instance;
 
     private final long window;
+
+    private
 
     public App(long window) {
         if (instance != null)
@@ -22,6 +30,32 @@ public class App {
     }
 
     public void run() {
+        int program = setupShaderProgram();
+
+        float[] vertices = {
+                -0.5f, -0.5f, 0.0f,
+                0.5f, -0.5f, 0.0f,
+                0.0f,  0.5f, 0.0f
+        };
+
+        int[] indices = {
+                0, 1, 2,
+                1, 2, 3
+        };
+
+        int vao = glGenVertexArrays();
+        int ebo = glGenBuffers();
+        int vbo = glGenBuffers();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(0);
+
+        glUseProgram(program);
+
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -33,6 +67,55 @@ public class App {
         }
 
         glfwTerminate();
+    }
+
+    public int setupShaderProgram() {
+        int vsh = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vsh, getShaderSource("vertex_shader.vsh"));
+        glCompileShader(vsh);
+
+        if (glGetShaderi(vsh, GL_COMPILE_STATUS) == GL_FALSE) {
+            System.out.println("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{}"
+                    .replace("{}", glGetShaderInfoLog(vsh)));
+            throw new RuntimeException("Failed to compile vertex shader!");
+        }
+
+        int fsh = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fsh, getShaderSource("fragment_shader.vsh"));
+        glCompileShader(fsh);
+
+        if (glGetShaderi(fsh, GL_COMPILE_STATUS) == GL_FALSE) {
+            System.out.println("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}"
+                    .replace("{}", glGetShaderInfoLog(fsh)));
+            throw new RuntimeException("Failed to compile fragment shader!");
+        }
+
+        int program = glCreateProgram();
+        glAttachShader(program, vsh);
+        glAttachShader(program, fsh);
+        glLinkProgram(program);
+
+        if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
+            System.out.println("ERROR::SHADER::PROGRAM::LINKING_FAILED\n{}"
+                    .replace("{}", glGetProgramInfoLog(program)));
+            throw new RuntimeException("Failed to link shader program!");
+        }
+
+        glDeleteShader(vsh);
+        glDeleteShader(fsh);
+        return program;
+    }
+
+    private String getShaderSource(String shaderName) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try (InputStream is = classLoader.getResourceAsStream(shaderName)) {
+            if (is != null)
+                return new String(is.readAllBytes());
+            else throw new RuntimeException("Failed to get input stream for shader {}!"
+                    .replace("{}", shaderName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void handleInput(long window) {
