@@ -14,8 +14,6 @@ public class App {
 
     private final long window;
 
-    private
-
     public App(long window) {
         if (instance != null)
             throw new IllegalStateException("Instance already set!");
