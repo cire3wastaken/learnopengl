@@ -1,8 +1,12 @@
 package me.cire3;
 
 import me.cire3.lwjgl.objects.ProgramGL;
+import org.lwjgl.BufferUtils;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -31,16 +35,18 @@ public class App {
         ProgramGL program = setupShaderProgram();
         program.deleteShaders();
 
-        float[] vertices = {
+        FloatBuffer vertices = BufferUtils.createFloatBuffer(9);
+        vertices.put(new float[]{
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
-                0.0f,  0.5f, 0.0f
-        };
+                0.0f, 0.5f, 0.0f
+        });
 
-        int[] indices = {
+        IntBuffer indices = BufferUtils.createIntBuffer(6);
+        indices.put(new int[]{
                 0, 1, 2,
                 1, 2, 3
-        };
+        });
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -57,10 +63,6 @@ public class App {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindVertexArray(0);
-
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -69,7 +71,7 @@ public class App {
 
             program.useProgram();
             glBindVertexArray(vao);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
