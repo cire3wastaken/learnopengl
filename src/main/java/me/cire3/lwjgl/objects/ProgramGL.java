@@ -1,7 +1,6 @@
 package me.cire3.lwjgl.objects;
 
-import static org.lwjgl.opengl.GL20.glDeleteShader;
-import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL20.*;
 
 public class ProgramGL {
     private int program = -1;
@@ -22,11 +21,24 @@ public class ProgramGL {
     }
 
     public void deleteShaders() {
-        if (vsh != -1)
+        if (vsh != -1) {
             glDeleteShader(vsh);
-        if (fsh != -1)
+            vsh = -1;
+        }
+        if (fsh != -1) {
             glDeleteShader(fsh);
-        if (gsh != -1)
+            fsh = -1;
+        }
+        if (gsh != -1) {
             glDeleteShader(gsh);
+            gsh = -1;
+        }
+    }
+
+    public void deleteProgram() {
+        if (program != -1) {
+            glDeleteProgram(program);
+            program = -1;
+        }
     }
 }

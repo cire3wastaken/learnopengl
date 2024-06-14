@@ -7,8 +7,7 @@ import java.io.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public class App {
     private static App instance;
@@ -30,6 +29,7 @@ public class App {
 
     public void run() {
         ProgramGL program = setupShaderProgram();
+        program.deleteShaders();
 
         float[] vertices = {
                 -0.5f, -0.5f, 0.0f,
@@ -47,16 +47,19 @@ public class App {
         int vbo = glGenBuffers();
 
         glBindVertexArray(vao);
+
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
-        program.useProgram();
-        program.deleteShaders();
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        glBindVertexArray(vao);
+        glBindVertexArray(0);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
@@ -64,9 +67,18 @@ public class App {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            program.useProgram();
+            glBindVertexArray(vao);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+
+        glDeleteVertexArrays(vao);
+        glDeleteBuffers(vbo);
+        glDeleteBuffers(ebo);
+        program.deleteProgram();
 
         glfwTerminate();
     }
