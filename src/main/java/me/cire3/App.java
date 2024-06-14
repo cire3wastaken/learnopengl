@@ -2,6 +2,7 @@ package me.cire3;
 
 import me.cire3.lwjgl.objects.ProgramGL;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -32,6 +33,8 @@ public class App {
     }
 
     public void run() {
+        GL.createCapabilities();
+
         ProgramGL program = setupShaderProgram();
         program.deleteShaders();
 
