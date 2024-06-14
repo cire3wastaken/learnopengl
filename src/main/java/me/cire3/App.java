@@ -36,20 +36,22 @@ public class App {
 
         ProgramGL program = setupShaderProgram();
 
-        FloatBuffer vertices = BufferUtils.createFloatBuffer(9);
-        vertices.put(new float[]{
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.0f, 0.5f, 0.0f
-        });
-        vertices.flip();
+        float[] verticesData = {
+                0.5f,  0.5f, 0.0f,
+                1f, -0.5f, 0.0f,
+                0f, -0.5f, 0.0f,
+                -0.5f, 0.5f, 0.0f,
+                -1f,  -0.5f, 0.0f
+        };
+        FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
+        vertices.put(verticesData).flip();
 
-        IntBuffer indices = BufferUtils.createIntBuffer(6);
-        indices.put(new int[]{
+        int[] indicesData = {
                 0, 1, 2,
-                1, 2, 3
-        });
-        indices.flip();
+                3, 2, 4
+        };
+        IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
+        indices.put(indicesData).flip();
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -66,9 +68,6 @@ public class App {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -79,10 +78,8 @@ public class App {
             glBindVertexArray(vao);
             glEnableVertexAttribArray(0);
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            glDisableVertexAttribArray(0);
-            glBindVertexArray(0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
