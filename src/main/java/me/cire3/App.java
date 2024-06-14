@@ -1,7 +1,6 @@
 package me.cire3;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -106,12 +105,9 @@ public class App {
     }
 
     private String getShaderSource(String shaderName) {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try (InputStream is = classLoader.getResourceAsStream(shaderName)) {
-            if (is != null)
-                return new String(is.readAllBytes());
-            else throw new RuntimeException("Failed to get input stream for shader {}!"
-                    .replace("{}", shaderName));
+        File resource = new File("resources/shaders/{}".replace("{}", shaderName));
+        try (InputStream is = new BufferedInputStream(new FileInputStream(resource))) {
+            return new String(is.readAllBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -104,10 +104,14 @@ dependencies {
 
 sourceSets {
     main {
-        resources {
-            srcDirs "src/main/resources"
+        java {
+            srcDir 'src/main/java'
         }
     }
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
 test {
