@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
+group 'me.cire3'
 version '1.0-SNAPSHOT'
 
 project.ext.lwjglVersion = "3.3.3"
