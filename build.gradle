@@ -100,6 +100,8 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-xxhash::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-yoga::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-zstd::$lwjglNatives"
+
+    testImplementation fileTree(dir: 'runtime', include: ['*.jar'])
 }
 
 sourceSets {
@@ -111,7 +113,10 @@ sourceSets {
 }
 
 jar {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    into 'resources', {
+        from 'resources'
+    }
 }
 
 test {

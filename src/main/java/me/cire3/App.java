@@ -9,10 +9,11 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengles.GLES20.*;
-import static org.lwjgl.opengles.GLES30.*;
+import static org.lwjgl.opengl.GL30C.*;
 
 public class App {
+    private static final File WORKING_DIRECTORY = new File(System.getProperty("user.dir"));
+
     private static App instance;
 
     private final long window;
@@ -98,7 +99,7 @@ public class App {
         }
 
         int fsh = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fsh, getShaderSource("fragment_shader.vsh"));
+        glShaderSource(fsh, getShaderSource("fragment_shader.fsh"));
         glCompileShader(fsh);
 
         if (glGetShaderi(fsh, GL_COMPILE_STATUS) == GL_FALSE) {
@@ -122,8 +123,9 @@ public class App {
     }
 
     private String getShaderSource(String shaderName) {
-        File resource = new File("resources/shaders/{}".replace("{}", shaderName));
-        try (InputStream is = new BufferedInputStream(new FileInputStream(resource))) {
+        File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
+
+        try (InputStream is = new FileInputStream(file1)) {
             return new String(is.readAllBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);

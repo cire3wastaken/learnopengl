@@ -1,6 +1,6 @@
 package me.cire3.lwjgl.objects;
 
-import static org.lwjgl.opengles.GLES20.*;
+import static org.lwjgl.opengl.GL20C.*;
 
 public class ProgramGL {
     private int program = -1;
