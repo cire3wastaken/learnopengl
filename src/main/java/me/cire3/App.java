@@ -35,7 +35,6 @@ public class App {
         GL.createCapabilities();
 
         ProgramGL program = setupShaderProgram();
-        program.deleteShaders();
 
         FloatBuffer vertices = BufferUtils.createFloatBuffer(9);
         vertices.put(new float[]{
@@ -43,12 +42,14 @@ public class App {
                 0.5f, -0.5f, 0.0f,
                 0.0f, 0.5f, 0.0f
         });
+        vertices.flip();
 
         IntBuffer indices = BufferUtils.createIntBuffer(6);
         indices.put(new int[]{
                 0, 1, 2,
                 1, 2, 3
         });
+        indices.flip();
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -65,6 +66,9 @@ public class App {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -73,7 +77,12 @@ public class App {
 
             program.useProgram();
             glBindVertexArray(vao);
+            glEnableVertexAttribArray(0);
+
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glDisableVertexAttribArray(0);
+            glBindVertexArray(0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -87,7 +96,7 @@ public class App {
         glfwTerminate();
     }
 
-    public ProgramGL setupShaderProgram() {
+    public static ProgramGL setupShaderProgram() {
         int vsh = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vsh, getShaderSource("vertex_shader.vsh"));
         glCompileShader(vsh);
@@ -119,10 +128,12 @@ public class App {
             throw new RuntimeException("Failed to link shader program!");
         }
 
-        return new ProgramGL(program, vsh, fsh, -1);
+        ProgramGL programGL = new ProgramGL(program, vsh, fsh, -1);
+        programGL.deleteShaders();
+        return programGL;
     }
 
-    private String getShaderSource(String shaderName) {
+    private static String getShaderSource(String shaderName) {
         File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
 
         try (InputStream is = new FileInputStream(file1)) {
