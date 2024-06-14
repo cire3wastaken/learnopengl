@@ -1,5 +1,7 @@
 package me.cire3;
 
+import me.cire3.lwjgl.objects.ProgramGL;
+
 import java.io.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -27,7 +29,7 @@ public class App {
     }
 
     public void run() {
-        int program = setupShaderProgram();
+        ProgramGL program = setupShaderProgram();
 
         float[] vertices = {
                 -0.5f, -0.5f, 0.0f,
@@ -51,7 +53,9 @@ public class App {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
-        glUseProgram(program);
+        program.useProgram();
+        program.deleteShaders();
+
         glBindVertexArray(vao);
 
         while (!glfwWindowShouldClose(window)) {
@@ -67,7 +71,7 @@ public class App {
         glfwTerminate();
     }
 
-    public int setupShaderProgram() {
+    public ProgramGL setupShaderProgram() {
         int vsh = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vsh, getShaderSource("vertex_shader.vsh"));
         glCompileShader(vsh);
@@ -99,9 +103,7 @@ public class App {
             throw new RuntimeException("Failed to link shader program!");
         }
 
-        glDeleteShader(vsh);
-        glDeleteShader(fsh);
-        return program;
+        return new ProgramGL(program, vsh, fsh, -1);
     }
 
     private String getShaderSource(String shaderName) {
