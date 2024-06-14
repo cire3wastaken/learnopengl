@@ -1,6 +1,7 @@
 package me.cire3;
 
 import me.cire3.lwjgl.objects.ShaderGL;
+import me.cire3.lwjgl.objects.UniformGL;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 
@@ -69,6 +70,14 @@ public class App {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+
+        shader.useProgram();
+        UniformGL u_color = shader.getUniform("u_color");
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -76,15 +85,12 @@ public class App {
             glClear(GL_COLOR_BUFFER_BIT);
 
             shader.useProgram();
-            glBindVertexArray(vao);
-            glEnableVertexAttribArray(0);
+            glUniform4f(u_color.getID(), 1.0f, 0.5f, 0.2f, 1.0f);
 
-            glUniform4f(shader.getUniform("u_color"), 1.0f, 0.5f, 0.2f, 1.0f);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
             // draw the orange triangle
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 3 * Float.BYTES);
 
-            glUniform4f(shader.getUniform("u_color"), 1.0f, 1.0f, 0.0f, 1.0f);
+            glUniform4f(u_color.getID(), 1.0f, 1.0f, 0.0f, 1.0f);
             // draw yellow triangle
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 

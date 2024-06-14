@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static me.cire3.App.WORKING_DIRECTORY;
 import static org.lwjgl.opengl.GL20C.*;
@@ -14,6 +16,8 @@ public class ShaderGL {
     private int vsh = -1;
     private int gsh = -1;
     private int fsh = -1;
+
+    private Map<Integer, UniformGL> uniforms = new HashMap<>();
 
     private ShaderGL(int program, int vsh, int gsh, int fsh) {
         this.program = program;
@@ -51,17 +55,25 @@ public class ShaderGL {
 
     public void setInt(String name, int value) {
         if (program != -1)
-            glUniform1i(getUniform(name), value);
+            glUniform1i(getUniform(name).getID(), value);
     }
 
     public void setFloat(String name, float value) {
         if (program != -1)
-            glUniform1f(getUniform(name), value);
+            glUniform1f(getUniform(name).getID(), value);
     }
 
-    public int getUniform(String uniform) {
-        if (program != -1)
-            return glGetUniformLocation(program, uniform);
+    public UniformGL getUniform(String uniform) {
+        if (program != -1) {
+            int uni = glGetUniformLocation(program, uniform);
+            if (uniforms.containsKey(uni))
+                return uniforms.get(uni);
+
+            UniformGL uniformGL = new UniformGL(uni);
+            uniforms.put(uni, uniformGL);
+
+            return uniformGL;
+        }
         throw new IllegalStateException("Program ID is -1!");
     }
 
