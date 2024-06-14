@@ -36,31 +36,53 @@ public class App {
 
         ProgramGL program = setupShaderProgram();
 
-        float[] verticesData = {
+        float[] verticesData1 = {
                 0.5f,  0.5f, 0.0f,
                 1f, -0.5f, 0.0f,
                 0f, -0.5f, 0.0f,
+        };
+
+        float[] verticesData2 = {
                 -0.5f, 0.5f, 0.0f,
+                0f, -0.5f, 0.0f,
                 -1f,  -0.5f, 0.0f
         };
-        FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
-        vertices.put(verticesData).flip();
+
+        FloatBuffer vertices1 = BufferUtils.createFloatBuffer(verticesData1.length);
+        vertices1.put(verticesData1).flip();
+
+        FloatBuffer vertices2 = BufferUtils.createFloatBuffer(verticesData2.length);
+        vertices2.put(verticesData2).flip();
 
         int[] indicesData = {
                 0, 1, 2,
-                3, 2, 4
         };
+
         IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
         indices.put(indicesData).flip();
 
-        int vao = glGenVertexArrays();
+        int vao1 = glGenVertexArrays();
+        int vao2 = glGenVertexArrays();
         int ebo = glGenBuffers();
-        int vbo = glGenBuffers();
+        int vbo1 = glGenBuffers();
+        int vbo2 = glGenBuffers();
 
-        glBindVertexArray(vao);
+        glBindVertexArray(vao1);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+        glBufferData(GL_ARRAY_BUFFER, vertices1, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(0);
+
+
+        glBindVertexArray(vao2);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+        glBufferData(GL_ARRAY_BUFFER, vertices2, GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
@@ -75,18 +97,24 @@ public class App {
             glClear(GL_COLOR_BUFFER_BIT);
 
             program.useProgram();
-            glBindVertexArray(vao);
+            glBindVertexArray(vao1);
             glEnableVertexAttribArray(0);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glBindVertexArray(vao2);
+            glEnableVertexAttribArray(0);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
 
-        glDeleteVertexArrays(vao);
-        glDeleteBuffers(vbo);
+        glDeleteVertexArrays(vao1);
+        glDeleteBuffers(vbo1);
         glDeleteBuffers(ebo);
         program.deleteProgram();
 
