@@ -15,7 +15,69 @@ public class ShaderGL {
     private int gsh = -1;
     private int fsh = -1;
 
-    public ShaderGL(String vertex, String geometry, String fragment) {
+    private ShaderGL(int program, int vsh, int gsh, int fsh) {
+        this.program = program;
+        this.vsh = vsh;
+        this.fsh = fsh;
+        this.gsh = gsh;
+    }
+
+    public void useProgram() {
+        if (program != -1)
+            glUseProgram(program);
+    }
+
+    public void deleteShaders() {
+        if (vsh != -1) {
+            glDeleteShader(vsh);
+            vsh = -1;
+        }
+        if (gsh != -1) {
+            glDeleteShader(gsh);
+            gsh = -1;
+        }
+        if (fsh != -1) {
+            glDeleteShader(fsh);
+            fsh = -1;
+        }
+    }
+
+    public void deleteProgram() {
+        if (program != -1) {
+            glDeleteProgram(program);
+            program = -1;
+        }
+    }
+
+    public void setInt(String name, int value) {
+        if (program != -1)
+            glUniform1i(getUniform(name), value);
+    }
+
+    public void setFloat(String name, float value) {
+        if (program != -1)
+            glUniform1f(getUniform(name), value);
+    }
+
+    public int getUniform(String uniform) {
+        if (program != -1)
+            return glGetUniformLocation(program, uniform);
+        throw new IllegalStateException("Program ID is -1!");
+    }
+
+    public static String getShaderSource(String shaderName) {
+        File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
+
+        try (InputStream is = new FileInputStream(file1)) {
+            return new String(is.readAllBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static ShaderGL makeShader(String vertex, String geometry, String fragment) {
+        int vsh = -1, gsh = -1, fsh = -1;
+
         if (vertex != null){
             vsh = glCreateShader(GL_VERTEX_SHADER);
             glShaderSource(vsh, getShaderSource(vertex));
@@ -67,67 +129,9 @@ public class ShaderGL {
             throw new RuntimeException("Failed to link shader program!");
         }
 
-        deleteShaders();
+        ShaderGL shader = new ShaderGL(program, vsh, gsh, fsh);
+        shader.deleteShaders();
+
+        return shader;
     }
-
-    public ShaderGL(int program, int vsh, int gsh, int fsh) {
-        this.program = program;
-        this.vsh = vsh;
-        this.fsh = fsh;
-        this.gsh = gsh;
-    }
-
-    public void useProgram() {
-        if (program != -1)
-            glUseProgram(program);
-    }
-
-    public void deleteShaders() {
-        if (vsh != -1) {
-            glDeleteShader(vsh);
-            vsh = -1;
-        }
-        if (gsh != -1) {
-            glDeleteShader(gsh);
-            gsh = -1;
-        }
-        if (fsh != -1) {
-            glDeleteShader(fsh);
-            fsh = -1;
-        }
-    }
-
-    public void deleteProgram() {
-        if (program != -1) {
-            glDeleteProgram(program);
-            program = -1;
-        }
-    }
-
-    public void setInt(String name, int value) {
-        if (program != -1)
-            glUniform1i(getUniform(name), value);
-    }
-
-    public void setFloat(String name, float value) {
-        if (program != -1)
-            glUniform1f(getUniform(name), value);
-    }
-
-    // FIXME this dont work idk why
-    public int getUniform(String uniform) {
-        return glGetUniformLocation(program, uniform);
-    }
-
-    public static String getShaderSource(String shaderName) {
-        File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
-
-        try (InputStream is = new FileInputStream(file1)) {
-            return new String(is.readAllBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
 }

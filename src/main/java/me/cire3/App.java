@@ -34,7 +34,7 @@ public class App {
     public void run() {
         GL.createCapabilities();
 
-        ShaderGL shader = new ShaderGL("vertex_shader.vsh", null, "fragment_shader.fsh");
+        ShaderGL shader = ShaderGL.makeShader("vertex_shader.vsh", null, "fragment_shader.fsh");
 
         float[] verticesData = {
                 0.5f,  0.5f, 0.0f,
@@ -85,7 +85,7 @@ public class App {
 
             glUniform4f(shader.getUniform("u_color"), 1.0f, 1.0f, 0.0f, 1.0f);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();

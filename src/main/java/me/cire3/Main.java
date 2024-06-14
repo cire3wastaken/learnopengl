@@ -24,6 +24,7 @@ public class Main {
         LaunchRenderDocDialog lr = new LaunchRenderDocDialog();
         lr.setLocationRelativeTo(null);
         lr.setVisible(true);
+        lr.dispose();
 
         initGlfw();
         App.getInstance().run();
