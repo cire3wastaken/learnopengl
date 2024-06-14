@@ -79,12 +79,15 @@ public class App {
             glBindVertexArray(vao);
             glEnableVertexAttribArray(0);
 
+            // TODO dont draw 3 triangles, try to draw 2 (eg the first triangle with color1, and the second with color2)
             glUniform4f(shader.getUniform("u_color"), 1.0f, 0.5f, 0.2f, 1.0f);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            // this draws both triangles
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glUniform4f(shader.getUniform("u_color"), 1.0f, 1.0f, 0.0f, 1.0f);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            // this draws the first
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
