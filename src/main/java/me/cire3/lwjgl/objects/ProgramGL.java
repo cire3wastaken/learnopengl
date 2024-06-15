@@ -1,5 +1,7 @@
 package me.cire3.lwjgl.objects;
 
+import me.cire3.lwjgl.ObjectGL;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,7 +13,7 @@ import static me.cire3.App.WORKING_DIRECTORY;
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER;
 
-public class ShaderGL {
+public class ProgramGL extends ObjectGL {
     private int program = -1;
     private int vsh = -1;
     private int gsh = -1;
@@ -19,7 +21,7 @@ public class ShaderGL {
 
     private Map<Integer, UniformGL> uniforms = new HashMap<>();
 
-    private ShaderGL(int program, int vsh, int gsh, int fsh) {
+    public ProgramGL(int program, int vsh, int gsh, int fsh) {
         this.program = program;
         this.vsh = vsh;
         this.fsh = fsh;
@@ -53,16 +55,6 @@ public class ShaderGL {
         }
     }
 
-    public void setInt(String name, int value) {
-        if (program != -1)
-            glUniform1i(getUniform(name).getID(), value);
-    }
-
-    public void setFloat(String name, float value) {
-        if (program != -1)
-            glUniform1f(getUniform(name).getID(), value);
-    }
-
     public UniformGL getUniform(String uniform) {
         if (program != -1) {
             int uni = glGetUniformLocation(program, uniform);
@@ -77,6 +69,12 @@ public class ShaderGL {
         throw new IllegalStateException("Program ID is -1!");
     }
 
+    @Override
+    protected void cleanup0() {
+        deleteShaders();
+        deleteProgram();
+    }
+
     public static String getShaderSource(String shaderName) {
         File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
 
@@ -87,7 +85,7 @@ public class ShaderGL {
         }
     }
 
-    public static ShaderGL makeShader(String vertex, String geometry, String fragment) {
+    public static ProgramGL newProgram(String vertex, String geometry, String fragment) {
         int vsh = -1, gsh = -1, fsh = -1;
 
         if (vertex != null){
@@ -141,7 +139,7 @@ public class ShaderGL {
             throw new RuntimeException("Failed to link shader program!");
         }
 
-        ShaderGL shader = new ShaderGL(program, vsh, gsh, fsh);
+        ProgramGL shader = new ProgramGL(program, vsh, gsh, fsh);
         shader.deleteShaders();
 
         return shader;

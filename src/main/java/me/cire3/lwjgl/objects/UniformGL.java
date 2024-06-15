@@ -1,6 +1,8 @@
 package me.cire3.lwjgl.objects;
 
-public class UniformGL {
+import me.cire3.lwjgl.ObjectGL;
+
+public class UniformGL extends ObjectGL {
     private int uniform = -1;
 
     public UniformGL(int uniform) {
@@ -11,5 +13,10 @@ public class UniformGL {
         if (uniform == -1)
             throw new RuntimeException("Uniform not set");
         return uniform;
+    }
+
+    @Override
+    protected void cleanup0() {
+
     }
 }

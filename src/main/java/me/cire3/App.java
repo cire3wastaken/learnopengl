@@ -1,6 +1,7 @@
 package me.cire3;
 
-import me.cire3.lwjgl.objects.ShaderGL;
+import me.cire3.lwjgl.ObjectGLManager;
+import me.cire3.lwjgl.objects.ProgramGL;
 import me.cire3.lwjgl.objects.UniformGL;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
@@ -35,7 +36,7 @@ public class App {
     public void run() {
         GL.createCapabilities();
 
-        ShaderGL shader = ShaderGL.makeShader("vertex_shader.vsh", null, "fragment_shader.fsh");
+        ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
 
         float[] verticesData = {
                 0.5f,  0.5f, 0.0f,
@@ -73,8 +74,8 @@ public class App {
         glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
 
-        shader.useProgram();
-        UniformGL u_color = shader.getUniform("u_color");
+        prog.useProgram();
+        UniformGL u_color = prog.getUniform("u_color");
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
@@ -84,7 +85,7 @@ public class App {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            shader.useProgram();
+            prog.useProgram();
             glUniform4f(u_color.getID(), 1.0f, 0.5f, 0.2f, 1.0f);
 
             // draw the orange triangle
@@ -101,8 +102,8 @@ public class App {
         glDeleteVertexArrays(vao);
         glDeleteBuffers(vbo);
         glDeleteBuffers(ebo);
-        shader.deleteProgram();
 
+        ObjectGLManager.cleanup();
         glfwTerminate();
     }
 
