@@ -9,7 +9,7 @@ public class UniformGL extends ObjectGL {
         this.uniform = uniform;
     }
 
-    public int getID() {
+    public int getId() {
         if (uniform == -1)
             throw new RuntimeException("Uniform not set");
         return uniform;

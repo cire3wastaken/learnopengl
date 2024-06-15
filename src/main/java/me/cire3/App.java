@@ -72,6 +72,8 @@ public class App {
         glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
 
+        UniformGL u_offset = prog.getUniform("u_offset");
+
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
@@ -79,6 +81,7 @@ public class App {
             glClear(GL_COLOR_BUFFER_BIT);
 
             prog.useProgram();
+            glUniform1f(u_offset.getId(), 0.25f);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
