@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static me.cire3.App.WORKING_DIRECTORY;
+import static me.cire3.App.getInputStream;
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER;
 
@@ -76,9 +77,7 @@ public class ProgramGL extends ObjectGL {
     }
 
     public static String getShaderSource(String shaderName) {
-        File file1 = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/shaders/", shaderName);
-
-        try (InputStream is = new FileInputStream(file1)) {
+        try (InputStream is = getInputStream("shaders/" + shaderName)) {
             return new String(is.readAllBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);

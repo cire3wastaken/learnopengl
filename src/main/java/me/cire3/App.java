@@ -39,14 +39,22 @@ public class App {
         ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
 
         float[] verticesData = {
-                // vertices                  color
-                0.5f, -0.5f, 0.0f,       1.0f, 0.0f, 0.0f,
-                -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,
-                0f, 0.5f, 0.0f,         0.0f, 0.0f, 1.0f
+                0.5f, -0.5f, 0.0f,
+                -0.5f, -0.5f, 0.0f,
+                0f, 0.5f, 0.0f,
         };
 
         FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
         vertices.put(verticesData).flip();
+
+        float[] texturesData = {
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                0.5f, 1.0f
+        };
+
+        FloatBuffer textureVertices = BufferUtils.createFloatBuffer(texturesData.length);
+        textureVertices.put(texturesData).flip();
 
         int[] indicesData = {
                 0, 1, 2,
@@ -66,13 +74,8 @@ public class App {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 6 * Float.BYTES, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
-        glEnableVertexAttribArray(1);
-
-        UniformGL u_offset = prog.getUniform("u_offset");
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
@@ -81,7 +84,6 @@ public class App {
             glClear(GL_COLOR_BUFFER_BIT);
 
             prog.useProgram();
-            glUniform1f(u_offset.getId(), 0.25f);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
@@ -103,5 +105,15 @@ public class App {
 
     public void framebufferSizeCallback(long window, int w, int h) {
         glViewport(0, 0, w, h);
+    }
+
+    public static InputStream getInputStream(String filename) {
+        File file = new File(WORKING_DIRECTORY.getAbsolutePath() + "/resources/" + filename);
+
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
