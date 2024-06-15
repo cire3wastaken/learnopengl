@@ -14,9 +14,4 @@ public class UniformGL extends ObjectGL {
             throw new RuntimeException("Uniform not set");
         return uniform;
     }
-
-    @Override
-    protected void cleanup0() {
-
-    }
 }

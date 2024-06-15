@@ -5,10 +5,5 @@ public abstract class ObjectGL {
         ObjectGLManager.objects.add(this);
     }
 
-    public final void cleanup() {
-        ObjectGLManager.objects.remove(this);
-        cleanup0();
-    }
-
-    protected abstract void cleanup0();
+    public void cleanup() {}
 }

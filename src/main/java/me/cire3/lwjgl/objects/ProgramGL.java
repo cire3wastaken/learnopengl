@@ -70,7 +70,7 @@ public class ProgramGL extends ObjectGL {
     }
 
     @Override
-    protected void cleanup0() {
+    public void cleanup() {
         deleteShaders();
         deleteProgram();
     }
