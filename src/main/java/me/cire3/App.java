@@ -2,6 +2,7 @@ package me.cire3;
 
 import me.cire3.lwjgl.ObjectGLManager;
 import me.cire3.lwjgl.objects.ProgramGL;
+import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.UniformGL;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
@@ -39,28 +40,24 @@ public class App {
         ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
 
         float[] verticesData = {
-                0.5f, -0.5f, 0.0f,
-                -0.5f, -0.5f, 0.0f,
-                0f, 0.5f, 0.0f,
+                // positions          // colors           // texture coords
+                0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+                0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
         };
 
         FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
         vertices.put(verticesData).flip();
 
-        float[] texturesData = {
-                0.0f, 0.0f,
-                1.0f, 0.0f,
-                0.5f, 1.0f
-        };
-
-        FloatBuffer textureVertices = BufferUtils.createFloatBuffer(texturesData.length);
-        textureVertices.put(texturesData).flip();
-
         int[] indicesData = {
-                0, 1, 2,
+                0, 1, 3, // first triangle
+                1, 2, 3  // second triangle
         };
         IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
         indices.put(indicesData).flip();
+
+        TextureGL coolWall = TextureGL.newTexture("sillybrickwall.png", GL_TEXTURE_2D, false, null);
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -74,8 +71,17 @@ public class App {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * Float.BYTES, 6 * Float.BYTES);
+        glEnableVertexAttribArray(2);
+
+        prog.useProgram();
+        glUniform1i(prog.getUniform("texture1").getId(), 0);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
@@ -83,7 +89,11 @@ public class App {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            glActiveTexture(0);
+            glBindTexture(coolWall.getTextureType(), coolWall.getTextureId());
+
             prog.useProgram();
+            glBindVertexArray(vao);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);

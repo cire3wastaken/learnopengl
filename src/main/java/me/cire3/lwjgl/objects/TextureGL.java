@@ -13,8 +13,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureGL extends ObjectGL {
     private static final Map<String, TextureGL> STRING_TEXTURE_GL_MAP = new HashMap<>();
@@ -48,14 +50,39 @@ public class TextureGL extends ObjectGL {
         }
     }
 
+    public int getTextureId() {
+        return texture;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getTextureType() {
+        return textureType;
+    }
+
     public static TextureGL newTexture(String texture) {
-        return newTexture(texture, GL_TEXTURE_2D, true);
+        return newTexture(texture, GL_TEXTURE_2D, true, TextureParameterConfigurer.DEFAULT_CONFIGURER);
+    }
+
+    public static TextureGL newTexture(String texture, int textureType) {
+        return newTexture(texture, textureType, true, TextureParameterConfigurer.DEFAULT_CONFIGURER);
+    }
+
+    public static TextureGL newTexture(String texture, boolean rgba) {
+        return newTexture(texture, GL_TEXTURE_2D, rgba, TextureParameterConfigurer.DEFAULT_CONFIGURER);
     }
 
     /**
-     * @return a TextureGL instance that wraps the underlying texture. You must set the texParameter yourself
+     * @return a TextureGL instance that wraps the underlying texture.
+     * @apiNote You must set the texParameter yourself via passing a texture parameter configurer via the last param
      * */
-    public static TextureGL newTexture(String texture, int textureType, boolean rgba) {
+    public static TextureGL newTexture(String texture, int textureType, boolean rgba, TextureParameterConfigurer configurer) {
         if (STRING_TEXTURE_GL_MAP.containsKey(texture)) {
             TextureGL textureGL =  STRING_TEXTURE_GL_MAP.get(texture);
             if (textureGL.textureType == textureType)
@@ -90,7 +117,8 @@ public class TextureGL extends ObjectGL {
                     buf.put((byte) ((pixel >> 16) & 0xFF));
                     buf.put((byte) ((pixel >> 8) & 0xFF));
                     buf.put((byte) (pixel & 0xFF));
-                    buf.put((byte) ((pixel >> 24) & 0xFF));
+                    if (rgba)
+                        buf.put((byte) ((pixel >> 24) & 0xFF));
                 }
             }
             buf.flip();
@@ -100,9 +128,25 @@ public class TextureGL extends ObjectGL {
             glTexImage2D(GL_TEXTURE_2D, 0, (rgba ? GL_RGBA8 : GL_RGB8), bufferedImage.getWidth(), bufferedImage.getHeight(),
                     0, (rgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
 
+            Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
+
+            glGenerateMipmap(GL_TEXTURE_2D);
+
             return new TextureGL(id, image, texture, textureType);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @FunctionalInterface
+    public interface TextureParameterConfigurer {
+        TextureParameterConfigurer DEFAULT_CONFIGURER = () -> {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        };
+
+        void setup();
     }
 }
