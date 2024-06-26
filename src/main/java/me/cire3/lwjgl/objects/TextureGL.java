@@ -28,7 +28,7 @@ public class TextureGL extends ObjectGL {
 
     /**
      * Automatically puts this TextureGL into the cache
-     * */
+     */
     private TextureGL(int texture, byte[] data, String name, int textureType) {
         this.texture = texture;
         this.data = data;
@@ -66,25 +66,17 @@ public class TextureGL extends ObjectGL {
         return textureType;
     }
 
-    public static TextureGL newTexture(String texture) {
-        return newTexture(texture, GL_TEXTURE_2D, true, TextureParameterConfigurer.DEFAULT_CONFIGURER);
-    }
-
-    public static TextureGL newTexture(String texture, int textureType) {
-        return newTexture(texture, textureType, true, TextureParameterConfigurer.DEFAULT_CONFIGURER);
-    }
-
-    public static TextureGL newTexture(String texture, boolean rgba) {
-        return newTexture(texture, GL_TEXTURE_2D, rgba, TextureParameterConfigurer.DEFAULT_CONFIGURER);
+    public static TextureGL newTexture(String texture, int textureType, boolean isRgba, TextureParameterConfigurer configurer) {
+        return newTexture(texture, textureType, true, isRgba, configurer);
     }
 
     /**
      * @return a TextureGL instance that wraps the underlying texture.
      * @apiNote You must set the texParameter yourself via passing a texture parameter configurer via the last param
-     * */
-    public static TextureGL newTexture(String texture, int textureType, boolean rgba, TextureParameterConfigurer configurer) {
+     */
+    public static TextureGL newTexture(String texture, int textureType, boolean flipTexture, boolean isRgba, TextureParameterConfigurer configurer) {
         if (STRING_TEXTURE_GL_MAP.containsKey(texture)) {
-            TextureGL textureGL =  STRING_TEXTURE_GL_MAP.get(texture);
+            TextureGL textureGL = STRING_TEXTURE_GL_MAP.get(texture);
             if (textureGL.textureType == textureType)
                 return textureGL;
         }
@@ -109,15 +101,16 @@ public class TextureGL extends ObjectGL {
             int[] pixels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
             bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), pixels, 0, bufferedImage.getWidth());
 
-            ByteBuffer buf = BufferUtils.createByteBuffer(bufferedImage.getWidth() * bufferedImage.getHeight() * (rgba ? 4 : 3));
+            ByteBuffer buf = BufferUtils.createByteBuffer(bufferedImage.getWidth() * bufferedImage.getHeight() * (isRgba ? 4 : 3));
 
-            for(int y = 0; y < bufferedImage.getHeight(); y++){
-                for(int x = 0; x < bufferedImage.getWidth(); x++){
+            // yes
+            for (int y = flipTexture ? bufferedImage.getHeight() - 1 : 0; flipTexture ? y >= 0 : y < bufferedImage.getHeight(); y += flipTexture ? -1 : 1) {
+                for (int x = 0; x < bufferedImage.getWidth(); x++) {
                     int pixel = pixels[y * bufferedImage.getWidth() + x];
                     buf.put((byte) ((pixel >> 16) & 0xFF));
                     buf.put((byte) ((pixel >> 8) & 0xFF));
                     buf.put((byte) (pixel & 0xFF));
-                    if (rgba)
+                    if (isRgba)
                         buf.put((byte) ((pixel >> 24) & 0xFF));
                 }
             }
@@ -125,8 +118,8 @@ public class TextureGL extends ObjectGL {
 
             int id = glGenTextures();
             glBindTexture(textureType, id);
-            glTexImage2D(GL_TEXTURE_2D, 0, (rgba ? GL_RGBA8 : GL_RGB8), bufferedImage.getWidth(), bufferedImage.getHeight(),
-                    0, (rgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
+            glTexImage2D(GL_TEXTURE_2D, 0, (isRgba ? GL_RGBA8 : GL_RGB8), bufferedImage.getWidth(), bufferedImage.getHeight(),
+                    0, (isRgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
 
             Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
 

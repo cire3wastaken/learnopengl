@@ -62,6 +62,9 @@ public class ProgramGL extends ObjectGL {
             if (uniforms.containsKey(uni))
                 return uniforms.get(uni);
 
+            if (uni == -1)
+                throw new IllegalArgumentException("Unknown Uniform!");
+
             UniformGL uniformGL = new UniformGL(uni);
             uniforms.put(uni, uniformGL);
 

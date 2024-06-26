@@ -41,10 +41,10 @@ public class App {
 
         float[] verticesData = {
                 // positions          // colors           // texture coords
-                0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-                0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+                0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
+                0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
+                -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left
         };
 
         FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
@@ -57,7 +57,8 @@ public class App {
         IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
         indices.put(indicesData).flip();
 
-        TextureGL coolWall = TextureGL.newTexture("sillybrickwall.png", GL_TEXTURE_2D, false, null);
+        TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false, null);
+        TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true, null);
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -82,6 +83,7 @@ public class App {
 
         prog.useProgram();
         glUniform1i(prog.getUniform("texture1").getId(), 0);
+        glUniform1i(prog.getUniform("texture2").getId(), 1);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
@@ -89,8 +91,10 @@ public class App {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glActiveTexture(0);
-            glBindTexture(coolWall.getTextureType(), coolWall.getTextureId());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(woodenBox.getTextureType(), woodenBox.getTextureId());
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
 
             prog.useProgram();
             glBindVertexArray(vao);
@@ -109,7 +113,7 @@ public class App {
     }
 
     public void handleInput(long window) {
-        if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
     }
 
