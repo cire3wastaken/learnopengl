@@ -20,7 +20,7 @@ public class ProgramGL extends ObjectGL {
     private int gsh = -1;
     private int fsh = -1;
 
-    private Map<Integer, UniformGL> uniforms = new HashMap<>();
+    private Map<String, UniformGL> uniforms = new HashMap<>();
 
     public ProgramGL(int program, int vsh, int gsh, int fsh) {
         this.program = program;
@@ -58,15 +58,16 @@ public class ProgramGL extends ObjectGL {
 
     public UniformGL getUniform(String uniform) {
         if (program != -1) {
+            if (uniforms.containsKey(uniform))
+                return uniforms.get(uniform);
+
             int uni = glGetUniformLocation(program, uniform);
-            if (uniforms.containsKey(uni))
-                return uniforms.get(uni);
 
             if (uni == -1)
                 throw new IllegalArgumentException("Unknown Uniform!");
 
             UniformGL uniformGL = new UniformGL(uni);
-            uniforms.put(uni, uniformGL);
+            uniforms.put(uniform, uniformGL);
 
             return uniformGL;
         }

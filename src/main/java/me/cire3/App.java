@@ -40,11 +40,47 @@ public class App {
         GL.createCapabilities();
 
         float[] verticesData = {
-                // positions          // colors           // texture coords
-                0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
-                0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
-                -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
         };
 
         FloatBuffer vertices = BufferUtils.createFloatBuffer(verticesData.length);
@@ -58,18 +94,35 @@ public class App {
         indices.put(indicesData).flip();
 
         ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
+
         TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
         TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true);
 
-
         Matrix4f projectionMatrix = new Matrix4f();
-        projectionMatrix.perspective((float) Math.toRadians(55.0F), 800.0F / 600.0F, 0.1F, 10);
+        projectionMatrix.perspective((float) Math.toRadians(45.0f), 800.0F / 600.0F, 0.1F, 10.0F);
 
         Matrix4f viewMatrix = new Matrix4f();
-        viewMatrix.translate(0.0f, 0.0f, -3.0f);
+        viewMatrix.translate(0.0F, 0.0F, -3.0F);
 
         Matrix4f modelMatrix = new Matrix4f();
-        modelMatrix.rotate((float) Math.toRadians(-55.0F), 1.0F, 0.0F, 0.0F);
+        // setup model matrix in frame
+
+        Matrix4f pvMatrix = new Matrix4f();
+        Matrix4f pvmMatrix = new Matrix4f();
+        Matrix4f vmMatrix = new Matrix4f();
+
+        Vector3f[] cubePositions = new Vector3f[] {
+                new Vector3f(0.0f,  0.0f,  0.0f),
+                new Vector3f( 2.0f,  5.0f, -15.0f),
+                new Vector3f(-1.5f, -2.2f, -2.5f),
+                new Vector3f(-3.8f, -2.0f, -12.3f),
+                new Vector3f( 2.4f, -0.4f, -3.5f),
+                new Vector3f(-1.7f,  3.0f, -7.5f),
+                new Vector3f( 1.3f, -2.0f, -2.5f),
+                new Vector3f( 1.5f,  2.0f, -2.5f),
+                new Vector3f( 1.5f,  0.2f, -1.5f),
+                new Vector3f(-1.3f,  1.0f, -1.5f)
+        };
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -83,28 +136,30 @@ public class App {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * Float.BYTES, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
-
-        glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * Float.BYTES, 6 * Float.BYTES);
-        glEnableVertexAttribArray(2);
 
         prog.useProgram();
         glUniform1i(prog.getUniform("texture1").getId(), 0);
         glUniform1i(prog.getUniform("texture2").getId(), 1);
 
-        glUniformMatrix4fv(prog.getUniform("u_projectionMatrix").getId(), false, projectionMatrix.get(BufferUtils.createFloatBuffer(16)));
-        glUniformMatrix4fv(prog.getUniform("u_viewMatrix").getId(), false, viewMatrix.get(BufferUtils.createFloatBuffer(16)));
-        glUniformMatrix4fv(prog.getUniform("u_modelMatrix").getId(), false, modelMatrix.get(BufferUtils.createFloatBuffer(16)));
+        // don't make new buffers every frame
+        FloatBuffer projectionMatrixBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer viewMatrixBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer modelMatrixBuffer = BufferUtils.createFloatBuffer(16);
+
+        FloatBuffer pvMatrixBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer vmMatrixBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer pvmMatrixBuffer = BufferUtils.createFloatBuffer(16);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(woodenBox.getTextureType(), woodenBox.getTextureId());
@@ -112,8 +167,32 @@ public class App {
             glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
 
             prog.useProgram();
+            pvMatrix.identity();
+            vmMatrix.identity();
+            pvmMatrix.identity();
+
+            projectionMatrix.mul(viewMatrix, pvMatrix).get(pvMatrixBuffer);
+
+            glEnable(GL_DEPTH_TEST);
+
             glBindVertexArray(vao);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            for (int i = 0; i < 10; i++)
+            {
+                // calculate the model matrix for each object and pass it to shader before drawing
+                modelMatrix.identity();
+                modelMatrix.translate(cubePositions[i]);
+                modelMatrix.rotate((float) Math.toRadians(20.0F * i), 1.0F, 0.3F, 0.5F);
+
+                viewMatrix.mul(modelMatrix, vmMatrix).get(vmMatrixBuffer);
+                pvMatrix.mul(modelMatrix, pvmMatrix).get(pvmMatrixBuffer);
+
+                glUniformMatrix4fv(prog.getUniform("u_pvmMatrix").getId(), false, pvmMatrixBuffer);
+
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+
+            glDisable(GL_DEPTH_TEST);
+//            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
