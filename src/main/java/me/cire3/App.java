@@ -182,8 +182,9 @@ public class App {
                 modelMatrix.identity();
                 modelMatrix.translate(cubePositions[i]);
                 modelMatrix.rotate((float) Math.toRadians(20.0F * i), 1.0F, 0.3F, 0.5F);
-
+                viewMatrix.identity();
                 viewMatrix.mul(modelMatrix, vmMatrix).get(vmMatrixBuffer);
+                pvMatrix.identity();
                 pvMatrix.mul(modelMatrix, pvmMatrix).get(pvmMatrixBuffer);
 
                 glUniformMatrix4fv(prog.getUniform("u_pvmMatrix").getId(), false, pvmMatrixBuffer);
