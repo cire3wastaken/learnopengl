@@ -146,14 +146,7 @@ public class App {
         glUniform1i(prog.getUniform("texture1").getId(), 0);
         glUniform1i(prog.getUniform("texture2").getId(), 1);
 
-        // don't make new buffers every frame
-        FloatBuffer projectionMatrixBuffer = BufferUtils.createFloatBuffer(16);
-        FloatBuffer viewMatrixBuffer = BufferUtils.createFloatBuffer(16);
-        FloatBuffer modelMatrixBuffer = BufferUtils.createFloatBuffer(16);
-
-        FloatBuffer pvMatrixBuffer = BufferUtils.createFloatBuffer(16);
-        FloatBuffer vmMatrixBuffer = BufferUtils.createFloatBuffer(16);
-        FloatBuffer pvmMatrixBuffer = BufferUtils.createFloatBuffer(16);
+        final FloatBuffer temporaryMatrixDataBuffer = BufferUtils.createFloatBuffer(16);
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);
@@ -171,7 +164,7 @@ public class App {
             vmMatrix.identity();
             pvmMatrix.identity();
 
-            projectionMatrix.mul(viewMatrix, pvMatrix).get(pvMatrixBuffer);
+            projectionMatrix.mul(viewMatrix, pvMatrix);
 
             glEnable(GL_DEPTH_TEST);
 
@@ -182,12 +175,11 @@ public class App {
                 modelMatrix.identity();
                 modelMatrix.translate(cubePositions[i]);
                 modelMatrix.rotate((float) Math.toRadians(20.0F * i), 1.0F, 0.3F, 0.5F);
-                viewMatrix.identity();
-                viewMatrix.mul(modelMatrix, vmMatrix).get(vmMatrixBuffer);
-                pvMatrix.identity();
-                pvMatrix.mul(modelMatrix, pvmMatrix).get(pvmMatrixBuffer);
+                
+                viewMatrix.mul(modelMatrix, vmMatrix);
+                pvMatrix.mul(modelMatrix, pvmMatrix);
 
-                glUniformMatrix4fv(prog.getUniform("u_pvmMatrix").getId(), false, pvmMatrixBuffer);
+                glUniformMatrix4fv(prog.getUniform("u_pvmMatrix").getId(), false, pvmMatrix.get(temporaryMatrixDataBuffer));
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
