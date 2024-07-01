@@ -4,6 +4,8 @@ import me.cire3.lwjgl.ObjectGLManager;
 import me.cire3.lwjgl.objects.ProgramGL;
 import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.UniformGL;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 
@@ -37,8 +39,6 @@ public class App {
     public void run() {
         GL.createCapabilities();
 
-        ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
-
         float[] verticesData = {
                 // positions          // colors           // texture coords
                 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
@@ -57,8 +57,19 @@ public class App {
         IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
         indices.put(indicesData).flip();
 
-        TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false, null);
-        TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true, null);
+        ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
+        TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
+        TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true);
+
+
+        Matrix4f projectionMatrix = new Matrix4f();
+        projectionMatrix.perspective((float) Math.toRadians(55.0F), 800.0F / 600.0F, 0.1F, 10);
+
+        Matrix4f viewMatrix = new Matrix4f();
+        viewMatrix.translate(0.0f, 0.0f, -3.0f);
+
+        Matrix4f modelMatrix = new Matrix4f();
+        modelMatrix.rotate((float) Math.toRadians(-55.0F), 1.0F, 0.0F, 0.0F);
 
         int vao = glGenVertexArrays();
         int ebo = glGenBuffers();
@@ -84,6 +95,10 @@ public class App {
         prog.useProgram();
         glUniform1i(prog.getUniform("texture1").getId(), 0);
         glUniform1i(prog.getUniform("texture2").getId(), 1);
+
+        glUniformMatrix4fv(prog.getUniform("u_projectionMatrix").getId(), false, projectionMatrix.get(BufferUtils.createFloatBuffer(16)));
+        glUniformMatrix4fv(prog.getUniform("u_viewMatrix").getId(), false, viewMatrix.get(BufferUtils.createFloatBuffer(16)));
+        glUniformMatrix4fv(prog.getUniform("u_modelMatrix").getId(), false, modelMatrix.get(BufferUtils.createFloatBuffer(16)));
 
         while (!glfwWindowShouldClose(window)) {
             handleInput(window);

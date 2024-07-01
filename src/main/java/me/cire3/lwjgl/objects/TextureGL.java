@@ -66,6 +66,10 @@ public class TextureGL extends ObjectGL {
         return textureType;
     }
 
+    public static TextureGL newTexture(String texture, int textureType, boolean isRgba) {
+        return newTexture(texture, textureType, isRgba, TextureParameterConfigurer.DEFAULT_CONFIGURER);
+    }
+
     public static TextureGL newTexture(String texture, int textureType, boolean isRgba, TextureParameterConfigurer configurer) {
         return newTexture(texture, textureType, true, isRgba, configurer);
     }

@@ -6,9 +6,13 @@ layout (location = 2) in vec2 aTexturePos;
 out vec3 v_color;
 out vec2 v_texturePos;
 
+uniform mat4 u_projectionMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
 void main()
 {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(aPos, 1.0);
     v_color = aColor;
     v_texturePos = aTexturePos;
 }

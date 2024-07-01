@@ -10,7 +10,12 @@ project.ext.lwjglNatives = "natives-windows"
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
 }
+
+project.ext.jomlVersion = "1.10.6"
 
 dependencies {
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
@@ -100,6 +105,9 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-xxhash::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-yoga::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-zstd::$lwjglNatives"
+
+
+    implementation "org.joml:joml:${jomlVersion}"
 
     testImplementation fileTree(dir: 'runtime', include: ['*.jar'])
 }
