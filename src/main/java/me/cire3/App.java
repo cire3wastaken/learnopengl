@@ -1,9 +1,8 @@
 package me.cire3;
 
 import me.cire3.lwjgl.ObjectGLManager;
-import me.cire3.lwjgl.objects.ProgramGL;
 import me.cire3.lwjgl.objects.TextureGL;
-import me.cire3.lwjgl.objects.UniformGL;
+import me.cire3.lwjgl.objects.programs.PipelineShaderCoreProgramGL;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
@@ -93,7 +92,7 @@ public class App {
         IntBuffer indices = BufferUtils.createIntBuffer(indicesData.length);
         indices.put(indicesData).flip();
 
-        ProgramGL prog = ProgramGL.newProgram("vertex_shader.vsh", null, "fragment_shader.fsh");
+        PipelineShaderCoreProgramGL pipelineShaderCoreProgramGL = PipelineShaderCoreProgramGL.create();
 
         TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
         TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true);
@@ -142,9 +141,9 @@ public class App {
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
 
-        prog.useProgram();
-        glUniform1i(prog.getUniform("texture1").getId(), 0);
-        glUniform1i(prog.getUniform("texture2").getId(), 1);
+        pipelineShaderCoreProgramGL.useProgram();
+        glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture1.getId(), 0);
+        glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture2.getId(), 1);
 
         final FloatBuffer temporaryMatrixDataBuffer = BufferUtils.createFloatBuffer(16);
 
@@ -159,7 +158,7 @@ public class App {
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
 
-            prog.useProgram();
+            pipelineShaderCoreProgramGL.useProgram();
             pvMatrix.identity();
             vmMatrix.identity();
             pvmMatrix.identity();
@@ -179,7 +178,7 @@ public class App {
                 viewMatrix.mul(modelMatrix, vmMatrix);
                 pvMatrix.mul(modelMatrix, pvmMatrix);
 
-                glUniformMatrix4fv(prog.getUniform("u_pvmMatrix").getId(), false, pvmMatrix.get(temporaryMatrixDataBuffer));
+                glUniformMatrix4fv(pipelineShaderCoreProgramGL.getUniforms().u_pvmMatrix.getId(), false, pvmMatrix.get(temporaryMatrixDataBuffer));
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
