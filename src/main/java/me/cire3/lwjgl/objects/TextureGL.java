@@ -2,7 +2,7 @@ package me.cire3.lwjgl.objects;
 
 import me.cire3.App;
 import me.cire3.lwjgl.ObjectGL;
-import org.lwjgl.BufferUtils;
+import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -105,7 +105,8 @@ public class TextureGL extends ObjectGL {
             int[] pixels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
             bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), pixels, 0, bufferedImage.getWidth());
 
-            ByteBuffer buf = BufferUtils.createByteBuffer(bufferedImage.getWidth() * bufferedImage.getHeight() * (isRgba ? 4 : 3));
+            // probably too big to use MemoryStack
+            ByteBuffer buf = MemoryUtil.memAlloc(bufferedImage.getWidth() * bufferedImage.getHeight() * (isRgba ? 4 : 3));
 
             // yes
             for (int y = flipTexture ? bufferedImage.getHeight() - 1 : 0; flipTexture ? y >= 0 : y < bufferedImage.getHeight(); y += flipTexture ? -1 : 1) {
@@ -128,6 +129,7 @@ public class TextureGL extends ObjectGL {
             Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
 
             glGenerateMipmap(GL_TEXTURE_2D);
+            MemoryUtil.memFree(buf);
 
             return new TextureGL(id, image, texture, textureType);
         } catch (IOException e) {

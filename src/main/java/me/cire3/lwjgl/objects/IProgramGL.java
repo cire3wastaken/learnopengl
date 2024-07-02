@@ -4,21 +4,29 @@ import me.cire3.lwjgl.ObjectGL;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
 
 import static me.cire3.App.getInputStream;
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER;
 
 public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL {
-    private int program = -1;
-    private int vsh = -1;
-    private int gsh = -1;
-    private int fsh = -1;
-    private T uniforms = null;
+    protected int program = -1;
+    protected int vsh = -1;
+    protected int gsh = -1;
+    protected int fsh = -1;
+    protected T uniforms = null;
 
-    private boolean hasSetupUniforms;
+    protected boolean hasSetupUniforms;
+
+    @SuppressWarnings("unchecked")
+    public IProgramGL(int program, int vsh, int gsh, int fsh, IProgramUniformsGL uniforms) {
+        this.program = program;
+        this.vsh = vsh;
+        this.gsh = gsh;
+        this.fsh = fsh;
+        this.uniforms = (T) uniforms;
+    }
 
     protected static String getShaderSource(String shaderName) {
         try (InputStream is = getInputStream("shaders/" + shaderName)) {
@@ -28,7 +36,9 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
         }
     }
 
-    protected void setupSelf(String vertex, String geometry, String fragment, T uniforms) {
+    protected static <P extends IProgramGL> P makeSelf(String vertex, String geometry, String fragment, IProgramUniformsGL<P> uniforms, Class<P> clazz) {
+        int vsh = -1, gsh = -1, fsh = -1;
+
         if (vertex != null){
             vsh = glCreateShader(GL_VERTEX_SHADER);
             glShaderSource(vsh, getShaderSource(vertex));
@@ -65,7 +75,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
             }
         }
 
-        program = glCreateProgram();
+        int program = glCreateProgram();
         if (vsh != -1)
             glAttachShader(program, vsh);
         if (gsh != -1)
@@ -80,14 +90,19 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
             throw new RuntimeException("Failed to link shader program!");
         }
 
-        deleteShaders();
-
-        this.uniforms = uniforms;
+        try {
+            return clazz.getDeclaredConstructor(int.class, int.class, int.class, int.class, IProgramUniformsGL.class)
+                    .newInstance(program, vsh, gsh, fsh, uniforms);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setupUniforms() {
         if (uniforms != null) {
-            useProgram();
+            if (program == -1)
+                throw new IllegalArgumentException("Program is not valid!");
+            glUseProgram(program);
             uniforms.setupUniforms(this);
             hasSetupUniforms = true;
         }
