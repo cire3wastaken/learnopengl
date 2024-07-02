@@ -93,6 +93,7 @@ public class App {
         indices.put(indicesData).flip();
 
         PipelineShaderCoreProgramGL pipelineShaderCoreProgramGL = PipelineShaderCoreProgramGL.create();
+        pipelineShaderCoreProgramGL.setupUniforms();
 
         TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
         TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true);

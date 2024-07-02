@@ -18,6 +18,8 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
     private int fsh = -1;
     private T uniforms = null;
 
+    private boolean hasSetupUniforms;
+
     protected static String getShaderSource(String shaderName) {
         try (InputStream is = getInputStream("shaders/" + shaderName)) {
             return new String(is.readAllBytes());
@@ -86,7 +88,8 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
     public void setupUniforms() {
         if (uniforms != null) {
             useProgram();
-            uniforms.setupUniforms();
+            uniforms.setupUniforms(this);
+            hasSetupUniforms = true;
         }
     }
 
@@ -140,6 +143,8 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
     }
 
     public T getUniforms() {
-        return uniforms;
+        if (hasSetupUniforms)
+            return uniforms;
+        throw new IllegalArgumentException("Tried to get uniforms when uniforms haven't been setup!");
     }
 }
