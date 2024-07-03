@@ -22,6 +22,13 @@ public class App {
 
     private final long window;
 
+    private static float playerX;
+    private static float playerY;
+    private static float playerZ;
+
+    private static float yaw;
+    private static float pitch;
+
     public App(long window) {
         if (instance != null)
             throw new IllegalStateException("Instance already set!");
@@ -101,7 +108,7 @@ public class App {
             projectionMatrix.perspective((float) Math.toRadians(45.0f), 800.0F / 600.0F, 0.01F, 100.0F);
 
             Matrix4f viewMatrix = new Matrix4f();
-            viewMatrix.translate(0.0F, 0.0F, -3.0F);
+//            viewMatrix.translate(0.0F, 0.0F, -3.0F);
 
             Matrix4f modelMatrix = new Matrix4f();
             // setup model matrix in frame
@@ -159,6 +166,11 @@ public class App {
                 glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
 
                 pipelineShaderCoreProgramGL.useProgram();
+                viewMatrix.identity();
+                viewMatrix.translate(playerX, playerY, playerZ);
+                viewMatrix.rotate(yaw, 1, 0, 0);
+                viewMatrix.rotate(pitch, 0, 1, 0);
+
                 pvMatrix.identity();
                 vmMatrix.identity();
                 pvmMatrix.identity();
@@ -204,6 +216,18 @@ public class App {
     public void handleInput(long window) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            playerZ += 0.1F;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            playerZ -= 0.1F;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            playerX += 0.1F;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            playerX -= 0.1F;
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            playerY -= 0.1F;
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+            playerY += 0.1F;
     }
 
     public void framebufferSizeCallback(long window, int w, int h) {
