@@ -24,7 +24,7 @@ public class App {
 
     private static float playerX;
     private static float playerY;
-    private static float playerZ;
+    private static float playerZ = -3.0F; // yes
 
     private static float yaw;
     private static float pitch;
@@ -111,6 +111,7 @@ public class App {
 //            viewMatrix.translate(0.0F, 0.0F, -3.0F);
 
             Matrix4f modelMatrix = new Matrix4f();
+            final Vector3f modelMatrixRotationVector = new Vector3f(1.0F, 0.3F, 0.5F).normalize();
             // setup model matrix in frame
 
             Matrix4f pvMatrix = new Matrix4f();
@@ -187,7 +188,7 @@ public class App {
                     float angle = 20.0f * i;
                     if (i % 3 == 0)
                         angle = (float) (glfwGetTime() * 25.0f);
-                    modelMatrix.rotate((float) Math.toRadians(angle), 1.0F, 0.3F, 0.5F);
+                    modelMatrix.rotate((float) Math.toRadians(angle), modelMatrixRotationVector);
 
                     viewMatrix.mul(modelMatrix, vmMatrix);
                     pvMatrix.mul(modelMatrix, pvmMatrix);
