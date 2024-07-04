@@ -19,12 +19,8 @@ public class VertexArrayObjectGL extends ObjectGL {
         this.ebo = ebo;
     }
 
-    public static VertexArrayObjectGL newVertexArrayObject(@NotNull FloatBuffer verts, @Nullable IntBuffer indices, @NotNull VertexArrayObjectConfigurer configurer) {
+    public static VertexArrayObjectGL newVertexArrayObject(@Nullable IntBuffer indices, @NotNull VertexArrayObjectConfigurer configurer) {
         int vao = glGenVertexArrays();
-
-        VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(verts);
-        vbo.bind();
-        vbo.loadData();
 
         glBindVertexArray(vao);
         ElementBufferObjectGL ebo = null;

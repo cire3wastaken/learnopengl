@@ -131,7 +131,11 @@ public class App {
                 new Vector3f(-1.3f, 1.0f, -1.5f)
         };
 
-        VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(vertices, null, () -> {
+        VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(vertices);
+        vbo.bind();
+        vbo.loadData();
+
+        VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(null, () -> {
             glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
 

@@ -2,6 +2,7 @@ package me.cire3;
 
 import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.VertexArrayObjectGL;
+import me.cire3.lwjgl.objects.VertexBufferObjectGL;
 import me.cire3.lwjgl.objects.programs.PipelineShaderFontRendererProgramGL;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
@@ -35,6 +36,7 @@ public class FontRenderer {
 
     private PipelineShaderFontRendererProgramGL prog;
     private VertexArrayObjectGL vao;
+    private VertexBufferObjectGL vbo;
     // we need raw access so we cant use VertexBufferObjectGL
     private int instancesDataBufferId;
     private Matrix4f pvmMatrix;
@@ -84,7 +86,8 @@ public class FontRenderer {
         this.prog.setupUniforms();
         glUniform1i(this.prog.getUniforms().u_texture.getId(), 0);
 
-        this.vao = VertexArrayObjectGL.newVertexArrayObject(VERTICES, null, () -> {
+
+        this.vao = VertexArrayObjectGL.newVertexArrayObject(null, () -> {
             // -------------------- VERTICES --------------------
             glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
             glVertexAttribDivisor(0, 0);
@@ -104,6 +107,11 @@ public class FontRenderer {
             glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, false, 10, 4 * Float.BYTES);
             glVertexAttribDivisor(2, 1);
             glEnableVertexAttribArray(2);
+
+            // -------------------- VERTICES --------------------
+            this.vbo = VertexBufferObjectGL.newVertexBufferObjectGL(VERTICES);
+            this.vbo.bind();
+            this.vbo.loadData();
         });
 
         this.fontMetrics = textGraphics.getFontMetrics(font);
