@@ -12,7 +12,8 @@ public class PipelineShaderCoreProgramGL extends IProgramGL<PipelineShaderCorePr
     }
 
     public static PipelineShaderCoreProgramGL create() {
-        return IProgramGL.makeSelf("core.vsh", null, "core.fsh", new ProgramUniformsGL(), PipelineShaderCoreProgramGL.class);
+        return IProgramGL.make("core.vsh", null, "core.fsh", new ProgramUniformsGL(),
+                PipelineShaderCoreProgramGL.class);
     }
 
     public static class ProgramUniformsGL implements IProgramUniformsGL<PipelineShaderCoreProgramGL> {
@@ -22,13 +23,6 @@ public class PipelineShaderCoreProgramGL extends IProgramGL<PipelineShaderCorePr
 
         @Override
         public void setupUniforms(PipelineShaderCoreProgramGL prog) {
-            if (prog.getProgramId() == -1)
-                throw new IllegalArgumentException("Program is not valid!");
-            if (prog.getVshId() == -1)
-                throw new IllegalArgumentException("Program is missing vertex shader!");
-            if (prog.getFshId() == -1)
-                throw new IllegalArgumentException("Program is missing fragment shader!");
-
             u_texture1 = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_texture1"));
             u_texture2 = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_texture2"));
             u_pvmMatrix = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_pvmMatrix"));

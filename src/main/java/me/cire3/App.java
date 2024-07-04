@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -154,6 +155,8 @@ public class App {
             glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture2.getId(), 1);
 
             final FloatBuffer temporaryMatrixDataBuffer = stack.callocFloat(16);
+
+            FontRenderer fontRenderer = FontRenderer.newFontRenderer(Font.getFont("Arial"), true, true);
 
             while (!glfwWindowShouldClose(window)) {
                 handleInput(window);

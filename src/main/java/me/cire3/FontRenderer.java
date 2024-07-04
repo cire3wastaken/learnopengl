@@ -1,6 +1,8 @@
 package me.cire3;
 
 import me.cire3.lwjgl.objects.TextureGL;
+import me.cire3.lwjgl.objects.programs.PipelineShaderFontRendererProgramGL;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
 import java.awt.*;
@@ -19,9 +21,15 @@ public class FontRenderer {
 
     private TextureGL internalFontTextureAtlas;
     private ByteBuffer fontDataBuffer;
+    private int charactersDrawnToScreen;
+    private Matrix4f pvmMatrix;
+    private PipelineShaderFontRendererProgramGL prog;
+    private FontMetrics fontMetrics;
 
-    public FontRenderer(TextureGL fontTextureAtlas) {
+    private FontRenderer(TextureGL fontTextureAtlas, PipelineShaderFontRendererProgramGL prog, FontMetrics metrics) {
         this.internalFontTextureAtlas = fontTextureAtlas;
+        this.prog = prog;
+        this.fontMetrics = metrics;
         this.fontDataBuffer = BufferUtils.createByteBuffer(/*BYTES PER CHARACTER*/ 10 * /*MAX CHARACTERS*/ 6553);
     }
 
@@ -56,15 +64,45 @@ public class FontRenderer {
 
         TextureGL textureGL = TextureGL.newTexture(font.getFontName(), textImage, GL_TEXTURE_2D, true, false,null);
 
-        cachedFontRenderer = new FontRenderer(textureGL);
+        PipelineShaderFontRendererProgramGL prog = PipelineShaderFontRendererProgramGL.create();
+        prog.setupUniforms();
+
+        cachedFontRenderer = new FontRenderer(textureGL, prog, textGraphics.getFontMetrics(font));
         FONT_RENDERER_CACHE.put(font, cachedFontRenderer);
         return cachedFontRenderer;
     }
 
-    public void drawString(String string, float x, float y, int color) {
+    public void setPvmMatrix(Matrix4f matrix) {
+        this.pvmMatrix = matrix;
     }
 
-    protected static void appendChar() {
+    public void drawString(String string, float x, float y, int color) {
+        for (char c : string.toCharArray()) {
+            int charPos = ALL_ASCII_CHARS.indexOf(c);
+            if (charPos == -1)
+                continue;
+
+            int lengthBeforeChar = fontMetrics.stringWidth(ALL_ASCII_CHARS.substring(charPos));
+            int charLength = fontMetrics.charWidth(c);
+            int charHeight = fontMetrics.getHeight();
+        }
+    }
+
+    protected void appendChar(int x, int y, int u, int v, int w, int h, int color) {
+        if (charactersDrawnToScreen >= 6553)
+            throw new RuntimeException("too many chars oops");
+        charactersDrawnToScreen++;
+        fontDataBuffer.putShort((short) x);
+        fontDataBuffer.putShort((short) y);
+        fontDataBuffer.put((byte) u);
+        fontDataBuffer.put((byte) v);
+        fontDataBuffer.put((byte) w);
+        fontDataBuffer.put((byte) h);
+        color = ((color >> 1) & 0x7F000000) | (color & 0xFFFFFF);
+        fontDataBuffer.putInt(color);
+    }
+
+    protected static void draw() {
 
     }
 }
