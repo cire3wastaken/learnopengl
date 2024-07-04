@@ -153,7 +153,7 @@ public class App {
 
             final FloatBuffer temporaryMatrixDataBuffer = stack.callocFloat(16);
 
-            FontRenderer fontRenderer = FontRenderer.newFontRenderer(Font.getFont("Arial"), true, true);
+            FontRenderer fontRenderer = FontRenderer.newFontRenderer(new Font("Arial", Font.PLAIN, 14), true, true);
 
             while (!glfwWindowShouldClose(window)) {
                 handleInput(window);
