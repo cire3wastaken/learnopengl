@@ -12,7 +12,7 @@ public class PipelineShaderCoreProgramGL extends IProgramGL<PipelineShaderCorePr
     }
 
     public static PipelineShaderCoreProgramGL create() {
-        return IProgramGL.make("core.vsh", null, "core.fsh", new ProgramUniformsGL(),
+        return IProgramGL.newProgramGL("core.vsh", null, "core.fsh", new ProgramUniformsGL(),
                 PipelineShaderCoreProgramGL.class);
     }
 

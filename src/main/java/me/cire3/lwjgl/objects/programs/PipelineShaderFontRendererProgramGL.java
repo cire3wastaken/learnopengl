@@ -12,7 +12,7 @@ public class PipelineShaderFontRendererProgramGL extends IProgramGL<PipelineShad
     }
 
     public static PipelineShaderFontRendererProgramGL create() {
-        return IProgramGL.make("font_renderer.vsh", null,
+        return IProgramGL.newProgramGL("font_renderer.vsh", null,
                 "font_renderer.fsh", new UniformsGL(), PipelineShaderFontRendererProgramGL.class);
     }
 

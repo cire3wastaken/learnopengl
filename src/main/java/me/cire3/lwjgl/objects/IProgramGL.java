@@ -36,7 +36,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
         }
     }
 
-    protected static <P extends IProgramGL> P make(String vertex, String geometry, String fragment, IProgramUniformsGL<P> uniforms, Class<P> clazz) {
+    protected static <P extends IProgramGL> P newProgramGL(String vertex, String geometry, String fragment, IProgramUniformsGL<P> uniforms, Class<P> clazz) {
         int vsh = -1, gsh = -1, fsh = -1;
 
         if (vertex != null){

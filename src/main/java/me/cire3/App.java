@@ -1,7 +1,10 @@
 package me.cire3;
 
 import me.cire3.lwjgl.ObjectGLManager;
+import me.cire3.lwjgl.objects.ElementBufferObjectGL;
 import me.cire3.lwjgl.objects.TextureGL;
+import me.cire3.lwjgl.objects.VertexArrayObjectGL;
+import me.cire3.lwjgl.objects.VertexBufferObjectGL;
 import me.cire3.lwjgl.objects.programs.PipelineShaderCoreProgramGL;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -132,23 +135,17 @@ public class App {
                     new Vector3f(-1.3f, 1.0f, -1.5f)
             };
 
-            int vao = glGenVertexArrays();
-            int ebo = glGenBuffers();
-            int vbo = glGenBuffers();
+            VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(vertices);
 
-            glBindVertexArray(vao);
+            VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(indices, () -> {
+                glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+                glEnableVertexAttribArray(0);
 
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+                glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+                glEnableVertexAttribArray(1);
+            });
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-            glEnableVertexAttribArray(1);
+            ElementBufferObjectGL ebo = vao.getEbo();
 
             pipelineShaderCoreProgramGL.useProgram();
             glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture1.getId(), 0);
@@ -183,7 +180,7 @@ public class App {
 
                 glEnable(GL_DEPTH_TEST);
 
-                glBindVertexArray(vao);
+                vao.bind();
                 for (int i = 0; i < 10; i++) {
                     // calculate the model matrix for each object and pass it to shader before drawing
                     modelMatrix.identity();
@@ -207,10 +204,6 @@ public class App {
                 glfwSwapBuffers(window);
                 glfwPollEvents();
             }
-
-            glDeleteVertexArrays(vao);
-            glDeleteBuffers(vbo);
-            glDeleteBuffers(ebo);
 
             ObjectGLManager.cleanup();
             glfwTerminate();

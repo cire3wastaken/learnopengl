@@ -19,11 +19,14 @@ public class FontRenderer {
     public static final Color TRANSPARENT_COLOR = new Color(255, 255, 255, 0);
     public static final String ALL_ASCII_CHARS = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
+    private PipelineShaderFontRendererProgramGL prog;
+
+    private Matrix4f pvmMatrix;
     private TextureGL internalFontTextureAtlas;
+
     private ByteBuffer fontDataBuffer;
     private int charactersDrawnToScreen;
-    private Matrix4f pvmMatrix;
-    private PipelineShaderFontRendererProgramGL prog;
+
     private FontMetrics fontMetrics;
 
     private FontRenderer(TextureGL fontTextureAtlas, PipelineShaderFontRendererProgramGL prog, FontMetrics metrics) {
@@ -102,7 +105,7 @@ public class FontRenderer {
         fontDataBuffer.putInt(color);
     }
 
-    protected static void draw() {
+    protected void draw() {
 
     }
 }
