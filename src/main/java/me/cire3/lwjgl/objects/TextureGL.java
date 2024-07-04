@@ -20,23 +20,17 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureGL extends ObjectGL {
     private static final Map<String, TextureGL> STRING_TEXTURE_GL_MAP = new HashMap<>();
-    private static final Map<byte[], TextureGL> BYTE_ARRAY_TEXTURE_GL_MAP = new HashMap<>();
     private int texture;
-    private byte[] data;
     private String name;
     private int textureType;
 
     /**
      * Automatically puts this TextureGL into the cache
      */
-    private TextureGL(int texture, byte[] data, String name, int textureType) {
+    private TextureGL(int texture, String name, int textureType) {
         this.texture = texture;
-        this.data = data;
         this.name = name;
         this.textureType = textureType;
-
-        if (!BYTE_ARRAY_TEXTURE_GL_MAP.containsKey(data))
-            BYTE_ARRAY_TEXTURE_GL_MAP.put(data, this);
 
         if (!STRING_TEXTURE_GL_MAP.containsKey(name))
             STRING_TEXTURE_GL_MAP.put(name, this);
@@ -52,10 +46,6 @@ public class TextureGL extends ObjectGL {
 
     public int getTextureId() {
         return texture;
-    }
-
-    public byte[] getData() {
-        return data;
     }
 
     public String getName() {
@@ -97,44 +87,49 @@ public class TextureGL extends ObjectGL {
             byte[] image = bao.toByteArray();
             bao.close();
 
-            if (BYTE_ARRAY_TEXTURE_GL_MAP.containsKey(image))
-                return BYTE_ARRAY_TEXTURE_GL_MAP.get(image);
-
             BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(image));
 
-            int[] pixels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
-            bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), pixels, 0, bufferedImage.getWidth());
-
-            // probably too big to use MemoryStack
-            ByteBuffer buf = MemoryUtil.memAlloc(bufferedImage.getWidth() * bufferedImage.getHeight() * (isRgba ? 4 : 3));
-
-            // yes
-            for (int y = flipTexture ? bufferedImage.getHeight() - 1 : 0; flipTexture ? y >= 0 : y < bufferedImage.getHeight(); y += flipTexture ? -1 : 1) {
-                for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                    int pixel = pixels[y * bufferedImage.getWidth() + x];
-                    buf.put((byte) ((pixel >> 16) & 0xFF));
-                    buf.put((byte) ((pixel >> 8) & 0xFF));
-                    buf.put((byte) (pixel & 0xFF));
-                    if (isRgba)
-                        buf.put((byte) ((pixel >> 24) & 0xFF));
-                }
-            }
-            buf.flip();
-
-            int id = glGenTextures();
-            glBindTexture(textureType, id);
-            glTexImage2D(GL_TEXTURE_2D, 0, (isRgba ? GL_RGBA8 : GL_RGB8), bufferedImage.getWidth(), bufferedImage.getHeight(),
-                    0, (isRgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
-
-            Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
-
-            glGenerateMipmap(GL_TEXTURE_2D);
-            MemoryUtil.memFree(buf);
-
-            return new TextureGL(id, image, texture, textureType);
+            return newTexture(texture, bufferedImage, textureType, isRgba, flipTexture, configurer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static TextureGL newTexture(String name, BufferedImage bufferedImage, int textureType, boolean isRgba, boolean flipTexture, TextureParameterConfigurer configurer) {
+        return new TextureGL(processImage(bufferedImage, textureType, isRgba, flipTexture, configurer), name, textureType);
+    }
+
+    private static int processImage(BufferedImage image, int textureType, boolean isRgba, boolean flipTexture, TextureParameterConfigurer configurer) {
+        int[] pixels = new int[image.getWidth() * image.getHeight()];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+
+        // probably too big to use MemoryStack
+        ByteBuffer buf = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * (isRgba ? 4 : 3));
+
+        // yes
+        for (int y = flipTexture ? image.getHeight() - 1 : 0; flipTexture ? y >= 0 : y < image.getHeight(); y += flipTexture ? -1 : 1) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int pixel = pixels[y * image.getWidth() + x];
+                buf.put((byte) ((pixel >> 16) & 0xFF));
+                buf.put((byte) ((pixel >> 8) & 0xFF));
+                buf.put((byte) (pixel & 0xFF));
+                if (isRgba)
+                    buf.put((byte) ((pixel >> 24) & 0xFF));
+            }
+        }
+        buf.flip();
+
+        int id = glGenTextures();
+        glBindTexture(textureType, id);
+        glTexImage2D(GL_TEXTURE_2D, 0, (isRgba ? GL_RGBA8 : GL_RGB8), image.getWidth(), image.getHeight(),
+                0, (isRgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
+
+        Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        MemoryUtil.memFree(buf);
+
+        return id;
     }
 
     @FunctionalInterface
