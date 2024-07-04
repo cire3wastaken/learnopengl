@@ -28,13 +28,13 @@ public class VertexBufferObjectGL extends ObjectGL {
     public void update(FloatBuffer buffer) {
         if (vboId != -1) {
             this.buffer = buffer;
-            glBindBuffer(GL_ARRAY_BUFFER, vboId);
-            glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+            bind();
+            loadData();
         }
     }
 
     public void loadData() {
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
     }
 
     @Override

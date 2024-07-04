@@ -131,10 +131,6 @@ public class App {
                 new Vector3f(-1.3f, 1.0f, -1.5f)
         };
 
-        VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(vertices);
-        vbo.bind();
-        vbo.loadData();
-
         VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(null, () -> {
             glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
@@ -142,6 +138,10 @@ public class App {
             glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
             glEnableVertexAttribArray(1);
         });
+
+        VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(vertices);
+        vbo.bind();
+        vbo.loadData();
 
         pipelineShaderCoreProgramGL.useProgram();
         glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture1.getId(), 0);

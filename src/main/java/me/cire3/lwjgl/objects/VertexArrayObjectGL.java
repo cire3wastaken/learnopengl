@@ -4,7 +4,6 @@ import me.cire3.lwjgl.ObjectGL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
 
