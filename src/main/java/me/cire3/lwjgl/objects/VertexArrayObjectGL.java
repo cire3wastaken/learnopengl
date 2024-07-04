@@ -22,12 +22,11 @@ public class VertexArrayObjectGL extends ObjectGL {
     public static VertexArrayObjectGL newVertexArrayObject(@NotNull FloatBuffer verts, @Nullable IntBuffer indices, @NotNull VertexArrayObjectConfigurer configurer) {
         int vao = glGenVertexArrays();
 
-        glBindVertexArray(vao);
-
         VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(verts);
         vbo.bind();
         vbo.loadData();
 
+        glBindVertexArray(vao);
         ElementBufferObjectGL ebo = null;
 
         if (indices != null) {
