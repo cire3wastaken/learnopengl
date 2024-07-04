@@ -1,6 +1,7 @@
 package me.cire3;
 
 import me.cire3.lwjgl.objects.TextureGL;
+import me.cire3.lwjgl.objects.VertexArrayObjectGL;
 import me.cire3.lwjgl.objects.programs.PipelineShaderFontRendererProgramGL;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
@@ -9,31 +10,49 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 
 public class FontRenderer {
-    private static final Map<Font, FontRenderer> FONT_RENDERER_CACHE = new HashMap<>();
+    public static final Map<Font, FontRenderer> FONT_RENDERER_CACHE = new HashMap<>();
     public static final Color TRANSPARENT_COLOR = new Color(255, 255, 255, 0);
     public static final String ALL_ASCII_CHARS = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    public static final FloatBuffer VERTICES = BufferUtils.createFloatBuffer(18);
+
+    static {
+        VERTICES.put(new float[]{
+                0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f
+        });
+        VERTICES.flip();
+    }
 
     private PipelineShaderFontRendererProgramGL prog;
-
+    private VertexArrayObjectGL vao;
     private Matrix4f pvmMatrix;
     private TextureGL internalFontTextureAtlas;
 
     private ByteBuffer fontDataBuffer;
     private int charactersDrawnToScreen;
 
+    private final int asciiCharsLength;
     private FontMetrics fontMetrics;
 
-    private FontRenderer(TextureGL fontTextureAtlas, PipelineShaderFontRendererProgramGL prog, FontMetrics metrics) {
-        this.internalFontTextureAtlas = fontTextureAtlas;
+    public FontRenderer(PipelineShaderFontRendererProgramGL prog, VertexArrayObjectGL vao, TextureGL internalFontTextureAtlas, FontMetrics fontMetrics) {
         this.prog = prog;
-        this.fontMetrics = metrics;
-        this.fontDataBuffer = BufferUtils.createByteBuffer(/*BYTES PER CHARACTER*/ 10 * /*MAX CHARACTERS*/ 6553);
+        this.vao = vao;
+        this.pvmMatrix = new Matrix4f();
+        this.internalFontTextureAtlas = internalFontTextureAtlas;
+
+        this.fontDataBuffer = BufferUtils.createByteBuffer(6553 * 10);
+
+        this.asciiCharsLength = this.fontMetrics.stringWidth(ALL_ASCII_CHARS);
+
+        this.fontMetrics = fontMetrics;
     }
 
     public static FontRenderer newFontRenderer(Font font, boolean antialiasing, boolean fractionalMetrics) {
@@ -70,7 +89,11 @@ public class FontRenderer {
         PipelineShaderFontRendererProgramGL prog = PipelineShaderFontRendererProgramGL.create();
         prog.setupUniforms();
 
-        cachedFontRenderer = new FontRenderer(textureGL, prog, textGraphics.getFontMetrics(font));
+        VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(null, () -> {
+            glVertexAttribPointer(0, );
+        });
+
+        cachedFontRenderer = new FontRenderer(prog, textureGL, textGraphics.getFontMetrics(font));
         FONT_RENDERER_CACHE.put(font, cachedFontRenderer);
         return cachedFontRenderer;
     }
@@ -79,7 +102,7 @@ public class FontRenderer {
         this.pvmMatrix = matrix;
     }
 
-    public void drawString(String string, float x, float y, int color) {
+    public void drawString(String string, int x, int y, int color) {
         for (char c : string.toCharArray()) {
             int charPos = ALL_ASCII_CHARS.indexOf(c);
             if (charPos == -1)
@@ -88,7 +111,11 @@ public class FontRenderer {
             int lengthBeforeChar = fontMetrics.stringWidth(ALL_ASCII_CHARS.substring(charPos));
             int charLength = fontMetrics.charWidth(c);
             int charHeight = fontMetrics.getHeight();
+
+            this.appendChar(x, y, (charPos == 0 ? 0 : lengthBeforeChar + 4), 0, charLength, charHeight, color);
         }
+
+        this.draw();
     }
 
     protected void appendChar(int x, int y, int u, int v, int w, int h, int color) {
