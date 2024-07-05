@@ -53,7 +53,7 @@ public class FontRenderer {
     public FontRenderer(Font font, boolean antialiasing, boolean fractional) {
         // -------------------- SETUP --------------------
         this.pvmMatrix = new Matrix4f();
-        this.fontDataBuffer = BufferUtils.createByteBuffer(6553 * 10);
+        this.fontDataBuffer = BufferUtils.createByteBuffer(65536);
         this.pvmMatrixBuffer = BufferUtils.createFloatBuffer(16);
 
         BufferedImage textImage = getBufferedImageForFont(font);
@@ -159,7 +159,7 @@ public class FontRenderer {
     }
 
     protected void appendChar(int x, int y, int u, int v, int color) {
-        if (charactersDrawnToScreen >= 6553)
+        if (charactersDrawnToScreen >= 4096)
             throw new RuntimeException("too many chars oops");
         charactersDrawnToScreen++;
         color = ((color >> 1) & 0x7F000000) | (color & 0xFFFFFF);
