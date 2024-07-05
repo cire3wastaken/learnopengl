@@ -10,15 +10,14 @@ public class ElementBufferObjectGL extends ObjectGL {
     private int eboId = -1;
     private IntBuffer buffer;
 
-    private ElementBufferObjectGL(int eboId) {
+    private ElementBufferObjectGL(int eboId, IntBuffer buffer) {
         this.eboId = eboId;
+        this.buffer = buffer;
     }
 
     public static ElementBufferObjectGL newElementBufferObject(IntBuffer buffer) {
         int eboId = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-        return new ElementBufferObjectGL(eboId);
+        return new ElementBufferObjectGL(eboId, buffer);
     }
 
     public void bind() {
@@ -31,6 +30,10 @@ public class ElementBufferObjectGL extends ObjectGL {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
         }
+    }
+
+    public void loadData() {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
     }
 
     @Override

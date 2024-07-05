@@ -49,7 +49,9 @@ public class App {
     public void run() {
         GL.createCapabilities();
 
-        try (MemoryStack stack = MemoryStack.stackPush()){
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FontRenderer fontRenderer = FontRenderer.newFontRenderer(new Font("Arial", Font.PLAIN, 14), true, true);
+
             float[] verticesData = {
                     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
                     0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
@@ -136,14 +138,15 @@ public class App {
             };
 
             VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(vertices);
+            vbo.bind();
+            vbo.loadData();
 
-            VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(indices, () -> {
-                glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-                glEnableVertexAttribArray(0);
+            VertexArrayObjectGL vao = VertexArrayObjectGL.newVertexArrayObject(indices);
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
 
-                glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-                glEnableVertexAttribArray(1);
-            });
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+            glEnableVertexAttribArray(1);
 
             ElementBufferObjectGL ebo = vao.getEbo();
 
@@ -152,8 +155,6 @@ public class App {
             glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture2.getId(), 1);
 
             final FloatBuffer temporaryMatrixDataBuffer = stack.callocFloat(16);
-
-            FontRenderer fontRenderer = FontRenderer.newFontRenderer(new Font("Arial", Font.PLAIN, 14), true, true);
 
             while (!glfwWindowShouldClose(window)) {
                 handleInput(window);
@@ -187,7 +188,7 @@ public class App {
                     modelMatrix.translate(cubePositions[i]);
                     float angle = 20.0f * i;
                     if (i % 3 == 0)
-                        angle = (float) (glfwGetTime() * 25.0f);
+                        angle = (float) (glfwGetTime() * 25.0f) + 20.0f * i;
                     modelMatrix.rotate((float) Math.toRadians(angle), modelMatrixRotationVector);
 
                     viewMatrix.mul(modelMatrix, vmMatrix);
@@ -199,7 +200,9 @@ public class App {
                 }
 
                 glDisable(GL_DEPTH_TEST);
-//            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+                fontRenderer.setPvmMatrix(pvMatrix);
+                fontRenderer.drawString("baugette", 0, 0, Color.WHITE.getRGB());
 
                 glfwSwapBuffers(window);
                 glfwPollEvents();

@@ -2,6 +2,7 @@ package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -17,13 +18,19 @@ public class VertexArrayObjectGL extends ObjectGL {
         this.ebo = ebo;
     }
 
-    public static VertexArrayObjectGL newVertexArrayObject(IntBuffer indices, @NotNull VertexArrayObjectConfigurer configurer) {
+    /**+
+     * Creates and binds a VAO, one must configure this manually
+     * */
+    public static VertexArrayObjectGL newVertexArrayObject(@Nullable IntBuffer indices) {
         int vao = glGenVertexArrays();
 
         glBindVertexArray(vao);
-        ElementBufferObjectGL ebo = ElementBufferObjectGL.newElementBufferObject(indices);
+        ElementBufferObjectGL ebo = null;
 
-        Objects.requireNonNull(configurer).configure();
+        if (indices != null) {
+            ebo = ElementBufferObjectGL.newElementBufferObject(indices);
+        }
+
         return new VertexArrayObjectGL(vao, ebo);
     }
 
@@ -46,10 +53,5 @@ public class VertexArrayObjectGL extends ObjectGL {
     public void cleanup() {
         if (vaoId != -1)
             glDeleteVertexArrays(vaoId);
-    }
-
-    @FunctionalInterface
-    public interface VertexArrayObjectConfigurer {
-        void configure();
     }
 }
