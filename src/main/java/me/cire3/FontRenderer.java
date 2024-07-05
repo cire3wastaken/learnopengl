@@ -86,6 +86,7 @@ public class FontRenderer {
         this.prog.setupUniforms();
         glUniform1i(this.prog.getUniforms().u_texture.getId(), 0);
 
+        this.instancesDataBufferId = glGenBuffers();
         this.vao = VertexArrayObjectGL.newVertexArrayObject(null);
 
         // -------------------- DEFAULT VERTICES (BOILERPLATE) --------------------
@@ -93,11 +94,10 @@ public class FontRenderer {
         glVertexAttribDivisor(0, 0);
         glEnableVertexAttribArray(0);
 
-
         // -------------------- DATA TO DRAW --------------------
-        this.instancesDataBufferId = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, instancesDataBufferId);
-        glBufferData(GL_ARRAY_BUFFER, fontDataBuffer.remaining(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, this.instancesDataBufferId);
+        glBufferData(GL_ARRAY_BUFFER, this.fontDataBuffer.remaining(), GL_STREAM_DRAW);
 
         // -------------------- COLOR --------------------
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 16, 0);
