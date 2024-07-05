@@ -3,7 +3,7 @@
 in vec4 v_color;
 in vec2 v_texturePos;
 
-layout (location = 0) out vec4 colorOutput;
+layout(location = 0) out vec4 colorOutput;
 
 uniform sampler2D u_texture;
 

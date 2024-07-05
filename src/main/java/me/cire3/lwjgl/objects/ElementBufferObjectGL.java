@@ -21,14 +21,20 @@ public class ElementBufferObjectGL extends ObjectGL {
     }
 
     public void bind() {
-        if (eboId != -1)
+        if (eboId != -1) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
+        }
+    }
+
+    public void loadData() {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
     }
 
     public void update(IntBuffer buffer) {
         if (eboId != -1) {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+            this.buffer = buffer;
+            bind();
+            loadData();
         }
     }
 
