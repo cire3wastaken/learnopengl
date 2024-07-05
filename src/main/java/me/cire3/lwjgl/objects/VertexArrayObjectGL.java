@@ -18,7 +18,10 @@ public class VertexArrayObjectGL extends ObjectGL {
         this.ebo = ebo;
     }
 
-    public static VertexArrayObjectGL newVertexArrayObject(@Nullable IntBuffer indices, @NotNull VertexArrayObjectConfigurer configurer) {
+    /**+
+     * Creates and binds a VAO, one must configure this manually
+     * */
+    public static VertexArrayObjectGL newVertexArrayObject(@Nullable IntBuffer indices) {
         int vao = glGenVertexArrays();
 
         glBindVertexArray(vao);
@@ -26,11 +29,8 @@ public class VertexArrayObjectGL extends ObjectGL {
 
         if (indices != null) {
             ebo = ElementBufferObjectGL.newElementBufferObject(indices);
-            ebo.bind();
-            ebo.loadData();
         }
 
-        Objects.requireNonNull(configurer).configure();
         return new VertexArrayObjectGL(vao, ebo);
     }
 
@@ -53,10 +53,5 @@ public class VertexArrayObjectGL extends ObjectGL {
     public void cleanup() {
         if (vaoId != -1)
             glDeleteVertexArrays(vaoId);
-    }
-
-    @FunctionalInterface
-    public interface VertexArrayObjectConfigurer {
-        void configure();
     }
 }

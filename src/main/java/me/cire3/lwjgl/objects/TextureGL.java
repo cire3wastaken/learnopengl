@@ -124,7 +124,7 @@ public class TextureGL extends ObjectGL {
         glTexImage2D(GL_TEXTURE_2D, 0, (isRgba ? GL_RGBA8 : GL_RGB8), image.getWidth(), image.getHeight(),
                 0, (isRgba ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, buf);
 
-        Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).setup();
+        Objects.requireNonNullElse(configurer, TextureParameterConfigurer.DEFAULT_CONFIGURER).configure();
 
         glGenerateMipmap(GL_TEXTURE_2D);
         MemoryUtil.memFree(buf);
@@ -141,6 +141,6 @@ public class TextureGL extends ObjectGL {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         };
 
-        void setup();
+        void configure();
     }
 }

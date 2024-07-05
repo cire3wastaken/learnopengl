@@ -2,8 +2,8 @@ package me.cire3;
 
 import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.VertexArrayObjectGL;
-import me.cire3.lwjgl.objects.VertexBufferObjectGL;
 import me.cire3.lwjgl.objects.programs.PipelineShaderFontRendererProgramGL;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
@@ -36,7 +36,6 @@ public class FontRenderer {
 
     private PipelineShaderFontRendererProgramGL prog;
     private VertexArrayObjectGL vao;
-    private VertexBufferObjectGL vbo;
     // we need raw access so we cant use VertexBufferObjectGL
     private int instancesDataBufferId;
     private Matrix4f pvmMatrix;
@@ -52,21 +51,18 @@ public class FontRenderer {
     private FontMetrics fontMetrics;
 
     public FontRenderer(Font font, boolean antialiasing, boolean fractional) {
+        // -------------------- SETUP --------------------
         this.pvmMatrix = new Matrix4f();
         this.fontDataBuffer = BufferUtils.createByteBuffer(6553 * 10);
         this.pvmMatrixBuffer = BufferUtils.createFloatBuffer(16);
 
-        BufferedImage dummy = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D dummyGraphics = (Graphics2D) dummy.getGraphics();
-        FontMetrics dummyFontMetrics = dummyGraphics.getFontMetrics(font);
-
-        Rectangle2D textRectangle = dummyFontMetrics.getStringBounds(ALL_ASCII_CHARS, dummyGraphics);
-        BufferedImage textImage = new BufferedImage((int) textRectangle.getWidth(), (int) textRectangle.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage textImage = getBufferedImageForFont(font);
 
         Graphics2D textGraphics = (Graphics2D) textImage.getGraphics();
         int w = textImage.getWidth();
         int h = textImage.getWidth();
 
+        // -------------------- GENERATE FONT TEXTURES --------------------
         textGraphics.setBackground(TRANSPARENT_COLOR);
         textGraphics.fillRect(0, 0, w, h);
         textGraphics.setColor(Color.WHITE);
@@ -80,42 +76,52 @@ public class FontRenderer {
 
         textGraphics.drawString(ALL_ASCII_CHARS, 4, font.getSize());
 
+        // -------------------- SAVE FONT TEXTURES --------------------
         this.internalFontTextureAtlas = TextureGL.newTexture(font.getFontName(), textImage, GL_TEXTURE_2D, true, false,null);
+        this.fontMetrics = textGraphics.getFontMetrics(font);
+        this.asciiCharsLength = this.fontMetrics.stringWidth(ALL_ASCII_CHARS);
 
+        // -------------------- SETUP OPENGL --------------------
         this.prog = PipelineShaderFontRendererProgramGL.create();
         this.prog.setupUniforms();
         glUniform1i(this.prog.getUniforms().u_texture.getId(), 0);
 
+        this.vao = VertexArrayObjectGL.newVertexArrayObject(null);
 
-        this.vao = VertexArrayObjectGL.newVertexArrayObject(null, () -> {
-            // -------------------- VERTICES --------------------
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
-            glVertexAttribDivisor(0, 0);
-            glEnableVertexAttribArray(0);
+        // -------------------- DEFAULT VERTICES (BOILERPLATE) --------------------
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
+        glVertexAttribDivisor(0, 0);
+        glEnableVertexAttribArray(0);
 
-            // -------------------- DATA TO DRAW --------------------
-            this.instancesDataBufferId = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, instancesDataBufferId);
-            glBufferData(GL_ARRAY_BUFFER, fontDataBuffer.remaining(), GL_STREAM_DRAW);
 
-            // -------------------- COLOR --------------------
-            glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 10, 0);
-            glVertexAttribDivisor(1, 1);
-            glEnableVertexAttribArray(1);
+        // -------------------- DATA TO DRAW --------------------
+        this.instancesDataBufferId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, instancesDataBufferId);
+        glBufferData(GL_ARRAY_BUFFER, fontDataBuffer.remaining(), GL_STREAM_DRAW);
 
-            // -------------------- TEXTURE POS --------------------
-            glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, false, 10, 4 * Float.BYTES);
-            glVertexAttribDivisor(2, 1);
-            glEnableVertexAttribArray(2);
+        // -------------------- COLOR --------------------
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 16, 0);
+        glVertexAttribDivisor(1, 1);
+        glEnableVertexAttribArray(1);
 
-            // -------------------- VERTICES --------------------
-            this.vbo = VertexBufferObjectGL.newVertexBufferObjectGL(VERTICES);
-            this.vbo.bind();
-            this.vbo.loadData();
-        });
+        // -------------------- TEXTURE POS --------------------
+        glVertexAttribPointer(2, 2, GL_INT, false, 16, 4 * Byte.BYTES);
+        glVertexAttribDivisor(2, 1);
+        glEnableVertexAttribArray(2);
 
-        this.fontMetrics = textGraphics.getFontMetrics(font);
-        this.asciiCharsLength = this.fontMetrics.stringWidth(ALL_ASCII_CHARS);
+        // -------------------- CHAR POS --------------------
+        glVertexAttribPointer(3, 2, GL_SHORT, false, 16, 4 * Byte.BYTES + 2 * Integer.BYTES);
+        glVertexAttribDivisor(3, 1);
+        glEnableVertexAttribArray(3);
+    }
+
+    private static @NotNull BufferedImage getBufferedImageForFont(Font font) {
+        BufferedImage dummy = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D dummyGraphics = (Graphics2D) dummy.getGraphics();
+        FontMetrics dummyFontMetrics = dummyGraphics.getFontMetrics(font);
+
+        Rectangle2D textRectangle = dummyFontMetrics.getStringBounds(ALL_ASCII_CHARS, dummyGraphics);
+        return new BufferedImage((int) textRectangle.getWidth(), (int) textRectangle.getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 
     public static FontRenderer newFontRenderer(Font font, boolean antialiasing, boolean fractionalMetrics) {
@@ -129,6 +135,9 @@ public class FontRenderer {
     }
 
     public void setPvmMatrix(Matrix4f matrix) {
+        if (pvmMatrix.equals(matrix))
+            return;
+
         this.pvmMatrix = matrix;
         this.pvmMatrixSerial++;
     }
@@ -153,12 +162,13 @@ public class FontRenderer {
         if (charactersDrawnToScreen >= 6553)
             throw new RuntimeException("too many chars oops");
         charactersDrawnToScreen++;
-        fontDataBuffer.putShort((short) x);
-        fontDataBuffer.putShort((short) y);
-        fontDataBuffer.put((byte) u);
-        fontDataBuffer.put((byte) v);
         color = ((color >> 1) & 0x7F000000) | (color & 0xFFFFFF);
-        fontDataBuffer.putInt(color);
+        fontDataBuffer.putInt(color);       // 4 bytes
+        fontDataBuffer.putInt(u);           // 4 bytes
+        fontDataBuffer.putInt(v);           // 4 bytes
+        fontDataBuffer.putShort((short) x); // 2 bytes
+        fontDataBuffer.putShort((short) y); // 2 bytes
+        // total is 16 bytes
     }
 
     protected void reset() {
@@ -175,7 +185,6 @@ public class FontRenderer {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(internalFontTextureAtlas.getTextureType(), internalFontTextureAtlas.getTextureId());
 
-        // must bind this first so the VAO don't cache
         glBindBuffer(GL_ARRAY_BUFFER, instancesDataBufferId);
         vao.bind();
 

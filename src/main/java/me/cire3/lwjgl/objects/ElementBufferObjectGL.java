@@ -38,6 +38,10 @@ public class ElementBufferObjectGL extends ObjectGL {
         }
     }
 
+    public void loadData() {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+    }
+
     @Override
     public void cleanup() {
         if (eboId != -1)
