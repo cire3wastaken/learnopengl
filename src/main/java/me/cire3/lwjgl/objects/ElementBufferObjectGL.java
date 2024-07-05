@@ -26,10 +26,6 @@ public class ElementBufferObjectGL extends ObjectGL {
         }
     }
 
-    public void loadData() {
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-    }
-
     public void update(IntBuffer buffer) {
         if (eboId != -1) {
             this.buffer = buffer;

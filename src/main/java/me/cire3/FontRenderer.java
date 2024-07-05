@@ -65,7 +65,6 @@ public class FontRenderer {
         // -------------------- GENERATE FONT TEXTURES --------------------
         textGraphics.setBackground(TRANSPARENT_COLOR);
         textGraphics.fillRect(0, 0, w, h);
-        textGraphics.setColor(Color.WHITE);
         if (antialiasing) {
             textGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             textGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -74,10 +73,19 @@ public class FontRenderer {
         textGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, fractional ?
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON : RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
 
-        textGraphics.drawString(ALL_ASCII_CHARS, 4, font.getSize());
+        textGraphics.setColor(Color.BLACK);
+        textGraphics.drawString(ALL_ASCII_CHARS, 0, 0);
 
         // -------------------- SAVE FONT TEXTURES --------------------
         this.internalFontTextureAtlas = TextureGL.newTexture(font.getFontName(), textImage, GL_TEXTURE_2D, true, false,null);
+        // testing
+        java.io.File file = new java.io.File("yes.png");
+        try {
+            javax.imageio.ImageIO.write(textImage, "png", file);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+
         this.fontMetrics = textGraphics.getFontMetrics(font);
         this.asciiCharsLength = this.fontMetrics.stringWidth(ALL_ASCII_CHARS);
 
