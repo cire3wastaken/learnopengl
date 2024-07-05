@@ -19,6 +19,10 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
 
     protected boolean hasSetupUniforms;
 
+    protected boolean detachedVsh;
+    protected boolean detachedGsh;
+    protected boolean detachedFsh;
+
     @SuppressWarnings("unchecked")
     public IProgramGL(int program, int vsh, int gsh, int fsh, IProgramUniformsGL uniforms) {
         this.program = program;
@@ -39,7 +43,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
     protected static <P extends IProgramGL> P newProgramGL(String vertex, String geometry, String fragment, IProgramUniformsGL<P> uniforms, Class<P> clazz) {
         int vsh = -1, gsh = -1, fsh = -1;
 
-        if (vertex != null){
+        if (vertex != null) {
             vsh = glCreateShader(GL_VERTEX_SHADER);
             glShaderSource(vsh, getShaderSource(vertex));
             glCompileShader(vsh);
@@ -63,7 +67,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
             }
         }
 
-        if (fragment != null){
+        if (fragment != null) {
             fsh = glCreateShader(GL_FRAGMENT_SHADER);
             glShaderSource(fsh, getShaderSource(fragment));
             glCompileShader(fsh);
@@ -91,9 +95,14 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
         }
 
         try {
-            return clazz.getDeclaredConstructor(int.class, int.class, int.class, int.class, IProgramUniformsGL.class)
+            P prog = clazz.getDeclaredConstructor(int.class, int.class, int.class, int.class, IProgramUniformsGL.class)
                     .newInstance(program, vsh, gsh, fsh, uniforms);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+
+            prog.detachShaders();
+            prog.deleteShaders();
+            return prog;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -109,7 +118,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
         }
     }
 
-    public void useProgram() {
+    public void bind() {
         if (program != -1)
             glUseProgram(program);
     }
@@ -126,6 +135,21 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
         if (fsh != -1) {
             glDeleteShader(fsh);
             fsh = -1;
+        }
+    }
+
+    public void detachShaders() {
+        if (vsh != -1 && !detachedVsh) {
+            glDetachShader(program, vsh);
+            detachedVsh = true;
+        }
+        if (gsh != -1 && !detachedGsh) {
+            glDetachShader(program, gsh);
+            detachedGsh = true;
+        }
+        if (fsh != -1 && !detachedFsh) {
+            glDetachShader(program, fsh);
+            detachedFsh = true;
         }
     }
 

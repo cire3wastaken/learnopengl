@@ -150,7 +150,7 @@ public class App {
 
             ElementBufferObjectGL ebo = vao.getEbo();
 
-            pipelineShaderCoreProgramGL.useProgram();
+            pipelineShaderCoreProgramGL.bind();
             glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture1.getId(), 0);
             glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture2.getId(), 1);
 
@@ -167,7 +167,7 @@ public class App {
                 glActiveTexture(GL_TEXTURE1);
                 glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
 
-                pipelineShaderCoreProgramGL.useProgram();
+                pipelineShaderCoreProgramGL.bind();
                 viewMatrix.identity();
                 viewMatrix.translate(playerX, playerY, playerZ);
                 viewMatrix.rotate(yaw, 1, 0, 0);
@@ -201,7 +201,7 @@ public class App {
 
                 glDisable(GL_DEPTH_TEST);
 
-                fontRenderer.setPvmMatrix(pvMatrix);
+                fontRenderer.updateMatrix(pvMatrix);
                 fontRenderer.drawString("baugette", 0, 0, Color.WHITE.getRGB());
 
                 glfwSwapBuffers(window);

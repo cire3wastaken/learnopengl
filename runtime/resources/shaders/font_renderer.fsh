@@ -1,16 +1,19 @@
 #version 330 core
 
-in vec4 v_color;
-in vec2 v_texturePos;
+precision lowp int;
+precision mediump float;
+precision mediump sampler2D;
 
-layout(location = 0) out vec4 colorOutput;
+in vec2 v_texCoord2f;
+in vec4 v_color4f;
 
-uniform sampler2D u_texture;
+layout(location = 0) out vec4 output4f;
+
+uniform sampler2D u_inputTexture;
 
 void main() {
-    // texture atlas is transparent/white, so we only color the white ones
-    colorOutput = texture(u_texture, v_texturePos) * v_color;
-    if (colorOutput.a < 0.004) {
+    output4f = texture(u_inputTexture, v_texCoord2f) * v_color4f;
+    if(output4f.a < 0.004) {
         discard;
     }
 }

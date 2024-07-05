@@ -18,14 +18,19 @@ public class PipelineShaderFontRendererProgramGL extends IProgramGL<PipelineShad
     }
 
     public static class UniformsGL implements IProgramUniformsGL<PipelineShaderFontRendererProgramGL> {
-        public UniformGL u_pvmMatrix;
-        public UniformGL u_texture;
+        public UniformGL u_matrixTransform;
+        public UniformGL u_charSize2f;
+        public UniformGL u_charCoordSize2f;
+        public UniformGL u_inputTexture;
 
         @Override
         public void setupUniforms(PipelineShaderFontRendererProgramGL prog) {
-            u_texture = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_texture"));
-            u_pvmMatrix = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_pvmMatrix"));
-            glUniform1i(u_texture.getId(), 0);
+            u_matrixTransform = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_matrixTransform"));
+            u_charSize2f = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_charSize2f"));
+            u_charCoordSize2f = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_charCoordSize2f"));
+            u_inputTexture = new UniformGL(glGetUniformLocation(prog.getProgramId(), "u_inputTexture"));
+
+            glUniform1i(u_inputTexture.getId(), 0);
         }
     }
 }
