@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.FloatBuffer;
 
@@ -15,9 +16,13 @@ public class VertexBufferObjectGL extends ObjectGL {
         this.buffer = buffer;
     }
 
-    public static VertexBufferObjectGL newVertexBufferObjectGL(FloatBuffer buffer) {
+    public static VertexBufferObjectGL newIncompleteVertexBufferObjectGL() {
+        return newVertexBufferObjectGL(null);
+    }
+
+    public static VertexBufferObjectGL newVertexBufferObjectGL(@Nullable FloatBuffer data) {
         int vboId = glGenBuffers();
-        return new VertexBufferObjectGL(vboId, buffer);
+        return new VertexBufferObjectGL(vboId, data);
     }
 
     public void bind() {

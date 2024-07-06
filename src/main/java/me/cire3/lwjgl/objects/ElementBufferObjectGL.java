@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.IntBuffer;
 
@@ -15,9 +16,13 @@ public class ElementBufferObjectGL extends ObjectGL {
         this.buffer = buffer;
     }
 
-    public static ElementBufferObjectGL newElementBufferObject(IntBuffer buffer) {
+    public static ElementBufferObjectGL newIncompleteElementBufferObject() {
+        return newElementBufferObject(null);
+    }
+
+    public static ElementBufferObjectGL newElementBufferObject(@Nullable IntBuffer indices) {
         int eboId = glGenBuffers();
-        return new ElementBufferObjectGL(eboId, buffer);
+        return new ElementBufferObjectGL(eboId, indices);
     }
 
     public void bind() {

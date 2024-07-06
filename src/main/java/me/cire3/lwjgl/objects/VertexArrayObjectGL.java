@@ -18,6 +18,10 @@ public class VertexArrayObjectGL extends ObjectGL {
         this.ebo = ebo;
     }
 
+    public static VertexArrayObjectGL newIncompleteVertexArrayObject() {
+        return newVertexArrayObject(null);
+    }
+
     /**+
      * Creates and binds a VAO, one must configure this manually
      * */

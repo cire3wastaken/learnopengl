@@ -101,8 +101,8 @@ public class FontRenderer {
 
         shaderProgram.setupUniforms();
 
-        vertexArray = VertexArrayObjectGL.newVertexArrayObject(null);
-        VertexBufferObjectGL vertexBuffer = VertexBufferObjectGL.newVertexBufferObjectGL(null);
+        vertexArray = VertexArrayObjectGL.newIncompleteVertexArrayObject();
+        VertexBufferObjectGL vertexBuffer = VertexBufferObjectGL.newIncompleteVertexBufferObjectGL();
         instancesBufferId = glGenBuffers();
 
         FloatBuffer verts = MemoryUtil.memAllocFloat(108);
