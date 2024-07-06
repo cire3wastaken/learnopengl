@@ -88,6 +88,7 @@ public class FontRenderer {
         textGraphics.drawString(ALL_ASCII_CHARS, 0, 0);
 
         // -------------------- SAVE FONT TEXTURES --------------------
+        // todo: make this R8 pixel format
         this.fontTexture = TextureGL.newTexture(font.getFontName(), textImage, GL_TEXTURE_2D, true, false,null);
         this.fontMetrics = textGraphics.getFontMetrics(font);
 

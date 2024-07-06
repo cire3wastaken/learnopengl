@@ -27,7 +27,7 @@ public class TextureGL extends ObjectGL {
     /**
      * Automatically puts this TextureGL into the cache
      */
-    private TextureGL(int texture, String name, int textureType) {
+    public TextureGL(int texture, String name, int textureType) {
         this.texture = texture;
         this.name = name;
         this.textureType = textureType;
