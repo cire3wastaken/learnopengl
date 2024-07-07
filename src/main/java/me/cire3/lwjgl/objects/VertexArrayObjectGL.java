@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +17,10 @@ public class VertexArrayObjectGL extends ObjectGL {
     private VertexArrayObjectGL(int vaoId, ElementBufferObjectGL ebo) {
         this.vaoId = vaoId;
         this.ebo = ebo;
+    }
+
+    public static VertexArrayObjectGL newVertexArrayObjectWithoutEBO() {
+        return newVertexArrayObject(null);
     }
 
     public static VertexArrayObjectGL newIncompleteVertexArrayObject() {
@@ -57,5 +62,6 @@ public class VertexArrayObjectGL extends ObjectGL {
     public void cleanup() {
         if (vaoId != -1)
             glDeleteVertexArrays(vaoId);
+        ObjectGLManager.objects.remove(this);
     }
 }

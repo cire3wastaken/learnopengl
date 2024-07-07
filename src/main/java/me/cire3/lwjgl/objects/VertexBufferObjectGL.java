@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.FloatBuffer;
@@ -46,5 +47,6 @@ public class VertexBufferObjectGL extends ObjectGL {
     public void cleanup() {
         if (vboId != -1)
             glDeleteBuffers(vboId);
+        ObjectGLManager.objects.remove(this);
     }
 }

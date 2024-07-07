@@ -7,8 +7,10 @@ public class ObjectGLManager {
     public static List<ObjectGL> objects = new ArrayList<>();
 
     public static void cleanup() {
-        for (ObjectGL obj : objects) {
-            obj.cleanup();
+        ObjectGL gl = objects.get(0);
+        while (gl != null) {
+            gl.cleanup();
+            gl = objects.get(0);
         }
         objects.clear();
     }

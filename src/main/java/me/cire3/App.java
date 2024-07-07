@@ -5,7 +5,7 @@ import me.cire3.lwjgl.objects.ElementBufferObjectGL;
 import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.VertexArrayObjectGL;
 import me.cire3.lwjgl.objects.VertexBufferObjectGL;
-import me.cire3.lwjgl.objects.programs.PipelineShaderCoreProgramGL;
+import me.cire3.lwjgl.objects.programs.PipelineShaderOldCoreProgramGL;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
@@ -23,6 +23,7 @@ public class App {
     public static final File WORKING_DIRECTORY = new File(System.getProperty("user.dir"));
 
     private static App instance;
+    private Renderer renderer;
 
     private final long window;
 
@@ -51,6 +52,7 @@ public class App {
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FontRenderer fontRenderer = FontRenderer.newFontRenderer(new Font("Arial", Font.PLAIN, 14), true, true);
+            this.renderer = new Renderer();
 
             float[] verticesData = {
                     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
@@ -104,7 +106,7 @@ public class App {
             };
             IntBuffer indices = stack.ints(indicesData);
 
-            PipelineShaderCoreProgramGL pipelineShaderCoreProgramGL = PipelineShaderCoreProgramGL.create();
+            PipelineShaderOldCoreProgramGL pipelineShaderCoreProgramGL = PipelineShaderOldCoreProgramGL.create();
             pipelineShaderCoreProgramGL.setupUniforms();
 
             TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
@@ -200,9 +202,9 @@ public class App {
                 }
 
                 glDisable(GL_DEPTH_TEST);
-
-                fontRenderer.updateMatrix(pvMatrix);
-                fontRenderer.drawString("baugette", 0, 0, Color.WHITE.getRGB());
+//
+//                fontRenderer.updateMatrix(pvMatrix);
+//                fontRenderer.drawString("baugette", 0, 0, Color.WHITE.getRGB());
 
                 glfwSwapBuffers(window);
                 glfwPollEvents();
@@ -242,5 +244,9 @@ public class App {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
     }
 }

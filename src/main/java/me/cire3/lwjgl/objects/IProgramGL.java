@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,6 +165,7 @@ public abstract class IProgramGL<T extends IProgramUniformsGL> extends ObjectGL 
     public void cleanup() {
         deleteShaders();
         deleteProgram();
+        ObjectGLManager.objects.remove(this);
     }
 
     public int getProgramId() {

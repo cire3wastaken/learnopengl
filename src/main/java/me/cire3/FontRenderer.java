@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
 
 public class FontRenderer {
     private static final Map<Font, FontRenderer> FONT_RENDERER_CACHE = new HashMap<>();
@@ -23,7 +27,12 @@ public class FontRenderer {
     private static final FloatBuffer VERTICES;
 
     static {
-        VERTICES = BufferUtils.createFloatBuffer()
+        VERTICES = BufferUtils.createFloatBuffer(18);
+        VERTICES.put(new float[]{
+                0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
+        });
+        VERTICES.flip();
     }
 
     private final PipelineShaderFontRendererProgramGL shaderProgram;
@@ -75,8 +84,10 @@ public class FontRenderer {
                     GL_TEXTURE_2D, true, false, new TextureGL.TextureParameterConfigurer() {
                         @Override
                         public void configure() {
-                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                         }
                     });
 
@@ -88,6 +99,19 @@ public class FontRenderer {
         // -------------------- OPENGL STUFF--------------------
         this.shaderProgram = PipelineShaderFontRendererProgramGL.create();
         this.shaderProgram.setupUniforms();
+
+        this.vao = VertexArrayObjectGL.newVertexArrayObjectWithoutEBO();
+        this.vao.bind();
+
+        VertexBufferObjectGL vbo = VertexBufferObjectGL.newVertexBufferObjectGL(VERTICES);
+        vbo.bind();
+        vbo.loadData();
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
+        glVertexAttribDivisor(0, 0);
+        glEnableVertexAttribArray(0);
+
+
     }
 
     public static FontRenderer newFontRenderer(Font font, boolean antialias, boolean fractionalMetrics) {

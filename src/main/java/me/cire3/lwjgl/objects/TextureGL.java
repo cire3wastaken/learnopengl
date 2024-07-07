@@ -2,6 +2,7 @@ package me.cire3.lwjgl.objects;
 
 import me.cire3.App;
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
@@ -23,14 +24,18 @@ public class TextureGL extends ObjectGL {
     private int texture;
     private String name;
     private int textureType;
+    private int width;
+    private int height;
 
     /**
      * Automatically puts this TextureGL into the cache
      */
-    public TextureGL(int texture, String name, int textureType) {
+    public TextureGL(int texture, String name, int textureType, int width, int height) {
         this.texture = texture;
         this.name = name;
         this.textureType = textureType;
+        this.width = width;
+        this.height = height;
 
         if (!STRING_TEXTURE_GL_MAP.containsKey(name))
             STRING_TEXTURE_GL_MAP.put(name, this);
@@ -42,6 +47,7 @@ public class TextureGL extends ObjectGL {
             glDeleteTextures(texture);
             texture = -1;
         }
+        ObjectGLManager.objects.remove(this);
     }
 
     public void bind() {
@@ -100,7 +106,7 @@ public class TextureGL extends ObjectGL {
     }
 
     public static TextureGL newTexture(String name, BufferedImage bufferedImage, int textureType, boolean isRgba, boolean flipTexture, TextureParameterConfigurer configurer) {
-        return new TextureGL(processImage(bufferedImage, textureType, isRgba, flipTexture, configurer), name, textureType);
+        return new TextureGL(processImage(bufferedImage, textureType, isRgba, flipTexture, configurer), name, textureType, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
 
     private static int processImage(BufferedImage image, int textureType, boolean isRgba, boolean flipTexture, TextureParameterConfigurer configurer) {
@@ -134,6 +140,14 @@ public class TextureGL extends ObjectGL {
         MemoryUtil.memFree(buf);
 
         return id;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     @FunctionalInterface

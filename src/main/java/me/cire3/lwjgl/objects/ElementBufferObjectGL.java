@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.IntBuffer;
@@ -47,5 +48,6 @@ public class ElementBufferObjectGL extends ObjectGL {
     public void cleanup() {
         if (eboId != -1)
             glDeleteBuffers(eboId);
+        ObjectGLManager.objects.remove(this);
     }
 }

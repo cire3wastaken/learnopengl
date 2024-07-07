@@ -1,6 +1,7 @@
 package me.cire3.lwjgl.objects;
 
 import me.cire3.lwjgl.ObjectGL;
+import me.cire3.lwjgl.ObjectGLManager;
 
 public class UniformGL extends ObjectGL {
     private int uniform = -1;
@@ -16,5 +17,7 @@ public class UniformGL extends ObjectGL {
     }
 
     @Override
-    public void cleanup() {}
+    public void cleanup() {
+        ObjectGLManager.objects.remove(this);
+    }
 }
