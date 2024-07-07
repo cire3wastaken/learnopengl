@@ -41,7 +41,7 @@ public class FontRenderer {
     private int instancesBufferId = -1;
 
     // set it to fill up ASCII first
-    private Map<Character, Glyph> characterGlyphs = new HashMap<>(128);
+    private Map<Character, TextureGL> characterGlyphs = new HashMap<>(128);
 
     private FontRenderer(Font font, boolean antialias, boolean fractionalMetrics) {
         // -------------------- DUMMY STUFF --------------------
@@ -91,9 +91,7 @@ public class FontRenderer {
                         }
                     });
 
-            Glyph glyph = new Glyph(textureGL, width, height);
-
-            this.characterGlyphs.put(c, glyph);
+            this.characterGlyphs.put(c, textureGL);
         }
 
         // -------------------- OPENGL STUFF--------------------
@@ -121,22 +119,5 @@ public class FontRenderer {
         cachedFontRenderer = new FontRenderer(font, antialias, fractionalMetrics);
         FONT_RENDERER_CACHE.put(font, cachedFontRenderer);
         return cachedFontRenderer;
-    }
-
-    private static class Glyph {
-        private TextureGL textureGL;
-        private float width;
-        private float height;
-
-        public Glyph(TextureGL textureGL, float width, float height) {
-            this.textureGL = textureGL;
-            this.width = width;
-            this.height = height;
-        }
-
-        public void draw(float x, float y) {
-            textureGL.bind();
-
-        }
     }
 }
