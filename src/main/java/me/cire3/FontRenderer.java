@@ -9,12 +9,14 @@ import org.lwjgl.BufferUtils;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
+import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
@@ -39,6 +41,7 @@ public class FontRenderer {
     private final VertexArrayObjectGL vao;
     // need raw control over stuff
     private int instancesBufferId = -1;
+    private ByteBuffer fontDataBuffer;
 
     // set it to fill up ASCII first
     private Map<Character, TextureGL> characterGlyphs = new HashMap<>(128);
@@ -95,8 +98,12 @@ public class FontRenderer {
         }
 
         // -------------------- OPENGL STUFF--------------------
+        this.fontDataBuffer = BufferUtils.createByteBuffer
+
         this.shaderProgram = PipelineShaderFontRendererProgramGL.create();
         this.shaderProgram.setupUniforms();
+
+        this.instancesBufferId = glGenBuffers();
 
         this.vao = VertexArrayObjectGL.newVertexArrayObjectWithoutEBO();
         this.vao.bind();
@@ -109,7 +116,8 @@ public class FontRenderer {
         glVertexAttribDivisor(0, 0);
         glEnableVertexAttribArray(0);
 
-
+        glBindBuffer(GL_ARRAY_BUFFER, instancesBufferId);
+        glBufferData(GL_ARRAY_BUFFER, , GL_STATIC_DRAW);
     }
 
     public static FontRenderer newFontRenderer(Font font, boolean antialias, boolean fractionalMetrics) {
