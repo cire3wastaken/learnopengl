@@ -163,9 +163,9 @@ public class App {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 glActiveTexture(GL_TEXTURE0);
-                glBindTexture(woodenBox.getTextureType(), woodenBox.getTextureId());
+                woodenBox.bind();
                 glActiveTexture(GL_TEXTURE1);
-                glBindTexture(awesomeFace.getTextureType(), awesomeFace.getTextureId());
+                awesomeFace.bind();
 
                 pipelineShaderCoreProgramGL.bind();
                 viewMatrix.identity();

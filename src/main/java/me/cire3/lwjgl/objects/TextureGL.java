@@ -44,6 +44,10 @@ public class TextureGL extends ObjectGL {
         }
     }
 
+    public void bind() {
+        glBindTexture(textureType, texture);
+    }
+
     public int getTextureId() {
         return texture;
     }
