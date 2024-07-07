@@ -52,7 +52,7 @@ public class FontRenderer {
         Graphics2D dummyGraphics = (Graphics2D) dummy.getGraphics();
         FontMetrics dummyFontMetrics = dummyGraphics.getFontMetrics(font);
 
-        // -------------------- GENERATE GLYPHS --------------------
+        // -------------------- GENERATE ASCII GLYPHS --------------------
         for (char c : ALL_ASCII_CHARS.toCharArray()) {
             Rectangle2D bounds = dummyFontMetrics.getStringBounds(c + "", dummyGraphics);
 

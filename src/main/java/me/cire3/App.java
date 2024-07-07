@@ -106,8 +106,8 @@ public class App {
             };
             IntBuffer indices = stack.ints(indicesData);
 
-            PipelineShaderOldCoreProgramGL pipelineShaderCoreProgramGL = PipelineShaderOldCoreProgramGL.create();
-            pipelineShaderCoreProgramGL.setupUniforms();
+            PipelineShaderOldCoreProgramGL pipelineShaderOldCoreProgramGL = PipelineShaderOldCoreProgramGL.create();
+            pipelineShaderOldCoreProgramGL.setupUniforms();
 
             TextureGL woodenBox = TextureGL.newTexture("wooden_box.png", GL_TEXTURE_2D, false);
             TextureGL awesomeFace = TextureGL.newTexture("awesome_face.png", GL_TEXTURE_2D, true);
@@ -152,9 +152,9 @@ public class App {
 
             ElementBufferObjectGL ebo = vao.getEbo();
 
-            pipelineShaderCoreProgramGL.bind();
-            glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture1.getId(), 0);
-            glUniform1i(pipelineShaderCoreProgramGL.getUniforms().u_texture2.getId(), 1);
+            pipelineShaderOldCoreProgramGL.bind();
+            glUniform1i(pipelineShaderOldCoreProgramGL.getUniforms().u_texture1.getId(), 0);
+            glUniform1i(pipelineShaderOldCoreProgramGL.getUniforms().u_texture2.getId(), 1);
 
             final FloatBuffer temporaryMatrixDataBuffer = stack.callocFloat(16);
 
@@ -169,7 +169,7 @@ public class App {
                 glActiveTexture(GL_TEXTURE1);
                 awesomeFace.bind();
 
-                pipelineShaderCoreProgramGL.bind();
+                pipelineShaderOldCoreProgramGL.bind();
                 viewMatrix.identity();
                 viewMatrix.translate(playerX, playerY, playerZ);
                 viewMatrix.rotate(yaw, 1, 0, 0);
@@ -196,7 +196,7 @@ public class App {
                     viewMatrix.mul(modelMatrix, vmMatrix);
                     pvMatrix.mul(modelMatrix, pvmMatrix);
 
-                    glUniformMatrix4fv(pipelineShaderCoreProgramGL.getUniforms().u_pvmMatrix.getId(), false, pvmMatrix.get(temporaryMatrixDataBuffer));
+                    glUniformMatrix4fv(pipelineShaderOldCoreProgramGL.getUniforms().u_pvmMatrix.getId(), false, pvmMatrix.get(temporaryMatrixDataBuffer));
 
                     glDrawArrays(GL_TRIANGLES, 0, 36);
                 }
