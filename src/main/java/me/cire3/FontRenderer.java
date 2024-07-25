@@ -98,7 +98,7 @@ public class FontRenderer {
         }
 
         // -------------------- OPENGL STUFF--------------------
-        this.fontDataBuffer = BufferUtils.createByteBuffer
+//        this.fontDataBuffer = BufferUtils.createByteBuffer
 
         this.shaderProgram = PipelineShaderFontRendererProgramGL.create();
         this.shaderProgram.setupUniforms();
@@ -117,7 +117,7 @@ public class FontRenderer {
         glEnableVertexAttribArray(0);
 
         glBindBuffer(GL_ARRAY_BUFFER, instancesBufferId);
-        glBufferData(GL_ARRAY_BUFFER, , GL_STATIC_DRAW);
+//        glBufferData(GL_ARRAY_BUFFER, , GL_STATIC_DRAW);
     }
 
     public static FontRenderer newFontRenderer(Font font, boolean antialias, boolean fractionalMetrics) {

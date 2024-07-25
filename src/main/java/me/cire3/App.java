@@ -52,7 +52,6 @@ public class App {
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FontRenderer fontRenderer = FontRenderer.newFontRenderer(new Font("Arial", Font.PLAIN, 14), true, true);
-            this.renderer = new Renderer();
 
             float[] verticesData = {
                     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
