@@ -1,43 +1,38 @@
 package me.cire3;
 
-import me.cire3.lwjgl.objects.TextureGL;
 import me.cire3.lwjgl.objects.VertexArrayObjectGL;
 import me.cire3.lwjgl.objects.VertexBufferObjectGL;
 import me.cire3.lwjgl.objects.programs.PipelineShaderCoreProgramGL;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-// https://github.com/SilverTiger/lwjgl3-tutorial/blob/master/src/silvertiger/tutorial/lwjgl/graphic/Renderer.java
 public class Renderer {
+    private static final Renderer theRenderer = new Renderer();
+
     private VertexArrayObjectGL vao;
     private VertexBufferObjectGL vbo;
     private PipelineShaderCoreProgramGL program;
 
-    private FloatBuffer vertices;
+    private ByteBuffer buffer;
     private int numVertices;
     private boolean drawing;
+    private final int stride = 3 * Integer.BYTES + 4 * Byte.BYTES + 2 * Integer.BYTES;
 
-    public void init() {
-        setupShaderProgram();
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    private Renderer() {
+        this.setupShaderProgram();
     }
 
-    /**
-     * Clears the drawing area.
-     */
     public void clear() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    /**
-     * Begin rendering.
-     */
     public void begin() {
         if (drawing) {
             throw new IllegalStateException("Renderer is already drawing!");
@@ -46,9 +41,6 @@ public class Renderer {
         numVertices = 0;
     }
 
-    /**
-     * End rendering.
-     */
     public void end() {
         if (!drawing) {
             throw new IllegalStateException("Renderer isn't drawing!");
@@ -57,9 +49,34 @@ public class Renderer {
         flush();
     }
 
+    public Renderer pos(int x, int y, int z) {
+        buffer.putInt(numVertices * stride, x);
+        buffer.putInt(numVertices * stride + 1, y);
+        buffer.putInt(numVertices * stride + 2, z);
+        return this;
+    }
+
+    public Renderer color(int r, int g, int b, int a) {
+        buffer.put(numVertices * stride + 3, (byte) (r & 0xFF));
+        buffer.put(numVertices * stride + 4, (byte) (g & 0xFF));
+        buffer.put(numVertices * stride + 5, (byte) (b & 0xFF));
+        buffer.put(numVertices * stride + 6, (byte) (a & 0xFF));
+        return this;
+    }
+
+    public Renderer texPos(int u, int v) {
+        buffer.putInt(numVertices * stride + 7, u);
+        buffer.putInt(numVertices * stride + 8, v);
+        return this;
+    }
+
+    public void endVertex() {
+        numVertices++;
+    }
+
     public void flush() {
         if (numVertices > 0) {
-            vertices.flip();
+            buffer.flip();
 
             if (vao != null) {
                 vao.bind();
@@ -69,139 +86,17 @@ public class Renderer {
             program.bind();
 
             vbo.bind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
 
             glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-            vertices.clear();
+            buffer.clear();
             numVertices = 0;
         }
     }
 
-    /**
-     * Draws the currently bound texture on specified coordinates and with
-     * specified color.
-     *
-     * @param texture Used for getting width and height of the texture
-     * @param x       X position of the texture
-     * @param y       Y position of the texture
-     * @param c       The color to use
-     */
-    public void drawTexture(TextureGL texture, float x, float y, int c) {
-        /* Vertex positions */
-        float x1 = x;
-        float y1 = y;
-        float x2 = x1 + texture.getWidth();
-        float y2 = y1 + texture.getHeight();
-
-        /* Texture coordinates */
-        float s1 = 0f;
-        float t1 = 0f;
-        float s2 = 1f;
-        float t2 = 1f;
-
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
-    }
-
-    /**
-     * Draws a texture region with the currently bound texture on specified
-     * coordinates.
-     *
-     * @param texture   Used for getting width and height of the texture
-     * @param x         X position of the texture
-     * @param y         Y position of the texture
-     * @param regX      X position of the texture region
-     * @param regY      Y position of the texture region
-     * @param regWidth  Width of the texture region
-     * @param regHeight Height of the texture region
-     */
-    public void drawTextureRegion(TextureGL texture, float x, float y, float regX, float regY, float regWidth, float regHeight) {
-        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, -1);
-    }
-
-    /**
-     * Draws a texture region with the currently bound texture on specified
-     * coordinates.
-     *
-     * @param texture   Used for getting width and height of the texture
-     * @param x         X position of the texture
-     * @param y         Y position of the texture
-     * @param regX      X position of the texture region
-     * @param regY      Y position of the texture region
-     * @param regWidth  Width of the texture region
-     * @param regHeight Height of the texture region
-     * @param c         The color to use
-     */
-    public void drawTextureRegion(TextureGL texture, float x, float y, float regX, float regY, float regWidth, float regHeight, int c) {
-        /* Vertex positions */
-        float x1 = x;
-        float y1 = y;
-        float x2 = x + regWidth;
-        float y2 = y + regHeight;
-
-        /* Texture coordinates */
-        float s1 = regX / texture.getWidth();
-        float t1 = regY / texture.getHeight();
-        float s2 = (regX + regWidth) / texture.getWidth();
-        float t2 = (regY + regHeight) / texture.getHeight();
-
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
-    }
-
-    /**
-     * Draws a texture region with the currently bound texture on specified
-     * coordinates.
-     *
-     * @param x1 Bottom left x position
-     * @param y1 Bottom left y position
-     * @param x2 Top right x position
-     * @param y2 Top right y position
-     * @param s1 Bottom left s coordinate
-     * @param t1 Bottom left t coordinate
-     * @param s2 Top right s coordinate
-     * @param t2 Top right t coordinate
-     */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2) {
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, -1);
-    }
-
-    /**
-     * Draws a texture region with the currently bound texture on specified
-     * coordinates.
-     *
-     * @param x1 Bottom left x position
-     * @param y1 Bottom left y position
-     * @param x2 Top right x position
-     * @param y2 Top right y position
-     * @param s1 Bottom left s coordinate
-     * @param t1 Bottom left t coordinate
-     * @param s2 Top right s coordinate
-     * @param t2 Top right t coordinate
-     * @param c  The color to use
-     */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, int c) {
-        if (vertices.remaining() < 8 * 6) {
-            flush();
-        }
-
-        float r = (float) (c >> 16 & 255) / 255.0F;
-        float g = (float) (c >> 8 & 255) / 255.0F;
-        float b = (float) (c & 255) / 255.0F;
-        float a = (float) (c >> 24 & 255) / 255.0F;
-
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
-        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
-
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
-        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1);
-
-        numVertices += 6;
-    }
-
     public void dispose() {
-        MemoryUtil.memFree(vertices);
+        MemoryUtil.memFree(buffer);
 
         if (vao != null)
             vao.cleanup();
@@ -216,14 +111,27 @@ public class Renderer {
         this.vbo = VertexBufferObjectGL.newIncompleteVertexBufferObjectGL();
         this.vbo.bind();
 
-        this.vertices = MemoryUtil.memAllocFloat(4096);
+        glVertexAttribPointer(0, 3, GL_UNSIGNED_INT, false, 3 * Integer.BYTES + 4 * Byte.BYTES + 2 * Integer.BYTES, 0);
+        glEnableVertexAttribArray(0);
 
-        long size = (long) this.vertices.capacity() * Float.BYTES;
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 3 * Integer.BYTES + 4 * Byte.BYTES + 2 * Integer.BYTES, 3 * Integer.BYTES);
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_UNSIGNED_INT, false, 3 * Integer.BYTES + 4 * Byte.BYTES + 2 * Integer.BYTES, 3 * Integer.BYTES + 4 * Byte.BYTES);
+        glEnableVertexAttribArray(2);
+
+        this.buffer = MemoryUtil.memAlloc(4096);
+
+        long size = (long) this.buffer.capacity() * Float.BYTES;
         glBufferData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW);
 
         this.numVertices = 0;
         this.drawing = false;
 
         this.program = PipelineShaderCoreProgramGL.create();
+    }
+
+    public static Renderer getInstance() {
+        return theRenderer;
     }
 }
